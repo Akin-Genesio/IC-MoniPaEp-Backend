@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "ts-node-dev --transpile-only --ignore-watch node_modules ./src/server.ts",
-    "commit": "git add .& cz"
+    "commit": "git add .& cz",
+    "typeorm" : "ts-node-dev node_modules/typeorm/cli.js"
   },
   "devDependencies": {
     "@types/express": "^4.17.11",
