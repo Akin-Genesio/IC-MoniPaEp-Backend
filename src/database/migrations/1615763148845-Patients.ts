@@ -17,6 +17,10 @@ export class Patients1615763148845 implements MigrationInterface {
                        type: "varchar",
                    },
                    {
+                       name: "email",
+                       type: "varchar"
+                   },
+                   {
                        name: "lastGPSLocation",
                        type: "varchar",
                    },
@@ -26,11 +30,11 @@ export class Patients1615763148845 implements MigrationInterface {
                    },
                    {
                        name: "workAddress",
-                       type: "number"
+                       type: "varchar"
                    },
                    {
                        name: "homeAddress",
-                       type: "number"
+                       type: "varchar"
                    },
                    {
                        name: "hasHealthPlan",
