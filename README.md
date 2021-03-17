@@ -9,3 +9,5 @@ Tecnologias utilizadas:
 - ORM utilizado: TypeORM
 
 - Tecnologia utilizada: NodeJS
+
+- Tipo de commit utilizado: Commitizen
