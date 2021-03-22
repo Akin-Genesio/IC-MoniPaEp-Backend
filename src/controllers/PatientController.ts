@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { Patient } from "../models/Patient";
-import {getRepository} from 'typeorm'
+import { getCustomRepository } from 'typeorm';
+import { PatientsRepository } from "../repositories/PatientsRepository";
 
 class PatientController{
     async create(request: Request, response: Response){
         const body = request.body;
         
-        const patientsRepository = getRepository(Patient)
+        const patientsRepository = getCustomRepository(PatientsRepository)
 
         const patientAlreadyExists = await patientsRepository.findOne({
             email: body.email
@@ -26,4 +26,4 @@ class PatientController{
     }
 }
 
-export {PatientController};
+export { PatientController };
