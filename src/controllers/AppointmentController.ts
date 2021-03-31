@@ -15,7 +15,7 @@ class AppointmentController {
 
         if(!patientExists){
             return response.status(404).json({
-                error: "Invalid id, patient not found"
+                error: "Invalid patient id, patient not found"
             })
         }
 
