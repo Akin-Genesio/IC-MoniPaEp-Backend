@@ -1,12 +1,11 @@
-import { query } from "express";
 import {MigrationInterface, QueryRunner, Table} from "typeorm";
 
-export class Vaccine1617149140114 implements MigrationInterface {
+export class Vaccines1617149572377 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
-                name: "vaccine",
+                name: "vaccines",
                 columns: [
                     {
                         name: "id",
