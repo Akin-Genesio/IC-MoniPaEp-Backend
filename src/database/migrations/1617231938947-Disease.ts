@@ -10,6 +10,7 @@ export class Disease1617231938947 implements MigrationInterface {
                     {
                         name: "name",
                         type: "varchar",
+                        isPrimary: true
                     },
                     {
                         name: "infected_Monitoring_Days",
