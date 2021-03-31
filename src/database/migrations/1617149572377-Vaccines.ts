@@ -18,7 +18,7 @@ export class Vaccines1617149572377 implements MigrationInterface {
                     },
                     {
                         name: "type",
-                        type: "string"
+                        type: "varchar"
                     },
                     {
                         name: "patient_id",
@@ -26,7 +26,7 @@ export class Vaccines1617149572377 implements MigrationInterface {
                     },
                     {
                         name: "usm_name",
-                        type: "string"
+                        type: "varchar"
                     }
                 ],
                 foreignKeys:[
@@ -52,7 +52,7 @@ export class Vaccines1617149572377 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable("vaccine")
+        await queryRunner.dropTable("vaccines")
     }
 
 }

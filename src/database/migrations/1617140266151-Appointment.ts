@@ -22,11 +22,11 @@ export class Appointment1617140266151 implements MigrationInterface {
                     },
                     {
                         name: "location",
-                        type: "string",
+                        type: "varchar",
                     },
                     {
                         name: "type",
-                        type: "string",
+                        type: "varchar",
                     },
                     {
                         name: "patient_id",
