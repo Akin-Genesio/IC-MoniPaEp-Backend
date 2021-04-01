@@ -14,7 +14,7 @@ class HealthProtocol{
     disease_name: string
 
     @ManyToOne(() => Disease)
-    @JoinColumn({name: "usm_name"})
+    @JoinColumn({name: "disease_name"})
     disease: Disease
 }
 
