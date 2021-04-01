@@ -1,5 +1,5 @@
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Patient } from ".";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Disease } from "./Disease";
 
 
 @Entity("healthProtocols")
@@ -13,9 +13,9 @@ class HealthProtocol{
     @Column()
     disease_name: string
 
-    @ManyToMany(() => Patient)
-    @JoinTable()
-    patients: Patient[]
+    @ManyToOne(() => Disease)
+    @JoinColumn({name: "usm_name"})
+    disease: Disease
 }
 
-export {HealthProtocol}
+export { HealthProtocol };
