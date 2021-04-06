@@ -17,6 +17,10 @@ export class Patients1615763148845 implements MigrationInterface {
                        type: "varchar",
                    },
                    {
+                       name: "password",
+                       type: "varchar"
+                   },
+                   {
                        name: "email",
                        type: "varchar"
                    },

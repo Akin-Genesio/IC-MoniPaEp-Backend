@@ -8,6 +8,10 @@ class Patient{
 
     @Column()
     name: string;
+
+    @Column()
+    password: string;
+
     @Column()
     email: string;
 

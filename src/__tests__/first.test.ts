@@ -2,18 +2,27 @@ import request from "supertest"
 import {app} from "../app"
 
 import createConnection from "../database"
+let connection
+
+
 
 describe("Patient", () => {
     beforeAll(async () => {
-        const connection = await createConnection()
+        connection = await createConnection()
         await connection.runMigrations()
+
     })
 
+    afterAll(async () => {
+        await connection.dropDatabase()
+    })
+
+    
     it("Should create a new patient", async() =>{
 
         const response = await request(app).post("/patients").send({
             name: "Akin",
-            email: "akin2@email.com",
+            email: "akin@email.com",
             lastGPSLocation: "123",
             allowSMS: true,
             workAddress: "321",
