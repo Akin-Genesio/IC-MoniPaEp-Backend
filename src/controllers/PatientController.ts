@@ -22,7 +22,7 @@ class PatientController{
 
         await patientsRepository.save(patient)
 
-        return response.json(patient);
+        return response.status(201).json(patient)
     }
 }
 

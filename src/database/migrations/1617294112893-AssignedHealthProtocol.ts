@@ -29,7 +29,7 @@ export class AssignedHealthProtocol1617294112893 implements MigrationInterface {
                     },
                     {
                         name: "FKHealthProtocol",
-                        referencedTableName: "healthprotocol",
+                        referencedTableName: "healthProtocols",
                         referencedColumnNames: ["id"],
                         columnNames: ["healthprotocol_id"],
                         onUpdate: "CASCADE",

@@ -1,23 +1,20 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
-import { v4 as uuid } from 'uuid'
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Disease } from "./Disease";
 
-@Entity("healthprotocol")
-class HealthProtocol {
-    @PrimaryColumn()
-    readonly id: string;
-
-    @Column()
-    disease_name: string;
+@Entity("healthProtocols")
+class HealthProtocol{
+    @PrimaryGeneratedColumn("uuid")
+    id: string
 
     @Column()
-    description: string;
+    description: string
 
-    constructor() {
-        if(!this.id) {
-            this.id = uuid()
-        }
-    }
+    @Column()
+    disease_name: string
 
+    @ManyToOne(() => Disease)
+    @JoinColumn({name: "disease_name"})
+    disease: Disease
 }
 
-export { HealthProtocol }
+export { HealthProtocol };

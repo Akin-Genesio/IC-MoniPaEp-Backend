@@ -1,10 +1,9 @@
 import { Router } from "express";
-import { DiseaseController, USMController, VaccineController } from "./controllers";
+import { DiseaseController, HealthProtocolController, USMController, VaccineController } from "./controllers";
 import { AppointmentController } from "./controllers/AppointmentController";
 import { AssignedHealthProtocolController } from "./controllers/AssignedHealthProtocolController";
 import { DiseaseOccurrenceController } from "./controllers/DiseaseOccurrenceController";
 import { FAQController } from "./controllers/FAQController";
-import { HealthProtocolController } from "./controllers/HealthProtocolController";
 import { PatientController } from "./controllers/PatientController";
 import { PatientMovementHistoryController } from "./controllers/PatientMovementHistoryController";
 import { SymptomController } from "./controllers/SymptomController";
