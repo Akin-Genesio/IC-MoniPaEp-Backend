@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, PrimaryColumn} from "typeorm";
+import { Column, Entity, JoinColumn, PrimaryColumn } from "typeorm";
 import { HealthProtocol } from "./HealthProtocol";
 import { Patient } from "./Patient";
 
@@ -10,7 +10,7 @@ class AssignedHealthProtocol {
     @JoinColumn({name: "patient_id"})
     patient: Patient
 
-    @Column()
+    @PrimaryColumn()
     healthprotocol_id: string;
 
     @JoinColumn({name: "healthprotocol_id"})

@@ -7,7 +7,7 @@ class SymptomOccurrence {
     @PrimaryColumn()
     disease_occurrence_id: string
 
-    @Column()
+    @PrimaryColumn()
     symptom_name: string
 
     @Column()

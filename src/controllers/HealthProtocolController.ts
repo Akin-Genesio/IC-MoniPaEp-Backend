@@ -5,7 +5,7 @@ import { HealthProtocolRepository } from "../repositories/HealthProtocolReposito
 class HealthProtocolController {
     async create(request: Request, response: Response) {
         const body = request.body
-        //console.log(body)
+        body.disease_name = body.disease_name.trim()
 
         const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
         
@@ -13,11 +13,9 @@ class HealthProtocolController {
             disease_name: body.disease_name
         })
 
-        //console.log(alreadyExists)
-
         if(alreadyExists) {
             return response.status(400).json({
-                error: "Health protocol already registered"
+                error: "Health protocol has already been registered"
             })
         }
 

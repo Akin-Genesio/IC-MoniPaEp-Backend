@@ -26,8 +26,6 @@ class DiseaseOccurrence {
     @JoinColumn({name: "patient_id"})
     patient: Patient
 
-    //@OneToMany(() => )
-
     constructor(){
         if(!this.id){
             this.id = uuid();

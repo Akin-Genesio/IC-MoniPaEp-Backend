@@ -5,6 +5,7 @@ import { SymptomRepository } from "../repositories/SymptomRepository";
 class SymptomController {
     async create(request: Request, response: Response) {
         const body = request.body
+        body.symptom = body.symptom.trim()
 
         const symptomRepository = getCustomRepository(SymptomRepository)
 
@@ -14,7 +15,7 @@ class SymptomController {
 
         if(symptomAlreadyExists) {
             return response.status(400).json({
-                error: "Symptom already registered"
+                error: "Symptom has already been registered"
             })
         }
 

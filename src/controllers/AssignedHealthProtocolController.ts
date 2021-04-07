@@ -18,7 +18,7 @@ class AssignedHealthProtocolController {
 
         if(!patientExists) {
             return response.status(400).json({
-                error: "Patient not valid"
+                error: "Patient is not valid"
             })
         }
 
@@ -28,7 +28,7 @@ class AssignedHealthProtocolController {
         
         if(!healthProtocolExists) {
             return response.status(400).json({
-                error: "Health Protocol not valid"
+                error: "Health protocol is not valid"
             })
         }
 
@@ -40,7 +40,7 @@ class AssignedHealthProtocolController {
 
         if(assignedHealthProtocolAlreadyExists) {
             return response.status(400).json({
-                error: "Health protocol already assigned"
+                error: "Health protocol has already been assigned"
             })
         }
 

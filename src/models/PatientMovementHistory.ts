@@ -1,16 +1,13 @@
-import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
+import { Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { DiseaseOccurrence } from "./DiseaseOccurrence";
 
 @Entity("patient_movement_history")
 class PatientMovementHistory {
-    @Column()
+    @PrimaryColumn()
     disease_occurrence_id: string
 
-    @Column()
-    address: string
-
-    @Column()
-    period: string
+    @PrimaryColumn()
+    description: string
 
     @ManyToOne(() => DiseaseOccurrence)
     @JoinColumn({name: "disease_occurrence_id"})

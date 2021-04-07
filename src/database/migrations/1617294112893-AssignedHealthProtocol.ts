@@ -9,11 +9,13 @@ export class AssignedHealthProtocol1617294112893 implements MigrationInterface {
                 columns: [
                     {
                         name: "patient_id",
-                        type: "uuid"
+                        type: "uuid",
+                        isPrimary: true
                     },
                     {
                         name: "healthprotocol_id",
-                        type: "uuid"
+                        type: "uuid",
+                        isPrimary: true
                     }
                 ],
                 foreignKeys: [

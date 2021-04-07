@@ -8,16 +8,14 @@ export class PatientMovementHistory1617648240666 implements MigrationInterface {
                 name: "patient_movement_history",
                 columns: [
                     {
-                        name: "address",
-                        type: "varchar"
-                    },
-                    {
-                        name: "period",
-                        type: "varchar"
+                        name: "description",
+                        type: "varchar",
+                        isPrimary: true
                     },
                     {
                         name: "disease_occurrence_id",
-                        type: "uuid"
+                        type: "uuid",
+                        isPrimary: true
                     }
                 ],
                 foreignKeys: [

@@ -10,10 +10,12 @@ export class SymptomOccurrence1617644285378 implements MigrationInterface {
                     {
                         name: "disease_occurrence_id",
                         type: "uuid",
+                        isPrimary: true
                     },
                     {
                         name: "symptom_name",
-                        type: "varchar"
+                        type: "varchar",
+                        isPrimary: true
                     },
                     {
                         name: "registered_date",

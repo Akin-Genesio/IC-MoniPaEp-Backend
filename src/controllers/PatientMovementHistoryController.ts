@@ -15,7 +15,7 @@ class PatientMovementHistoryController {
 
         if (!IsValidDiseaseOccurrence) {
             return response.status(400).json({
-                error: "Disease occurrence id not valid!"
+                error: "Disease occurrence id is not valid!"
             })
         }
 
