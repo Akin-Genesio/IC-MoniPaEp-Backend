@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, PrimaryColumn } from "typeorm";
+import { Entity, JoinColumn, PrimaryColumn } from "typeorm";
 import { HealthProtocol } from "./HealthProtocol";
 import { Patient } from "./Patient";
 
