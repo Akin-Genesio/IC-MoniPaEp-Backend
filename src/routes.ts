@@ -14,6 +14,7 @@ const vaccineController = new VaccineController()
 const diseaseController = new DiseaseController()
 const healthProtocolController = new HealthProtocolController()
 
+//Post routes
 router.post("/patients", patientController.create)
 router.post("/faq", faqController.create)
 router.post("/appointments", appointmentController.create)
@@ -21,4 +22,8 @@ router.post("/usm", usmController.create)
 router.post("/vaccine", vaccineController.create)
 router.post("/disease", diseaseController.create)
 router.post("/healthprotocol", healthProtocolController.create)
+
+
+//Get routes
+router.get("/patients", patientController.list)
 export { router };

@@ -24,6 +24,16 @@ class PatientController{
 
         return response.status(201).json(patient)
     }
+
+    async list(request: Request, response: Response){
+        const patientsRepository = getCustomRepository(PatientsRepository)
+
+        const patientsList = await patientsRepository.find()
+
+        console.log(patientsList)
+
+        return response.json(patientsList)
+    }
 }
 
 export { PatientController };
