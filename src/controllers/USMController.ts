@@ -77,6 +77,30 @@ class USMController{
 
         return response.status(200).json(body)
     }
+
+    async deleteOne(request: Request, response: Response){
+        const {usm_name} = request.params
+
+        const usmRepository = getCustomRepository(USMRepository)
+
+        const usm = await usmRepository.findOne({
+            name: usm_name
+        })
+        
+        if(!usm){
+            return response.status(404).json({
+                error: "USM not found"
+            })
+        }
+
+        usmRepository.createQueryBuilder()
+        .delete()
+        .from(USM)
+        .where("name = :name", { name: usm_name })
+        .execute();
+
+        return response.status(200).json("USM Deleted")
+    }
 }
 
 export {USMController}
