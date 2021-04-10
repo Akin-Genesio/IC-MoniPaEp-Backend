@@ -27,11 +27,16 @@ router.get("/usm/:usm_name", usmController.getOne)
 router.put("/usm/:usm_name", usmController.alterOne)
 router.delete("/usm/:usm_name", usmController.deleteOne)
 
+//Disease routes
+router.post("/disease", diseaseController.create)
+router.get("/disease", diseaseController.list)
+
+
 router.post("/faq", faqController.create)
 router.post("/appointments", appointmentController.create)
 
 router.post("/vaccine", vaccineController.create)
-router.post("/disease", diseaseController.create)
+
 router.post("/healthprotocol", healthProtocolController.create)
 
 

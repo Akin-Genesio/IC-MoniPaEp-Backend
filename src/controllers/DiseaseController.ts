@@ -24,6 +24,14 @@ class DiseaseController{
 
         return response.status(201).json(disease)
     }
+
+    async list(request: Request, response: Response){
+        const diseaseRepository = getCustomRepository(DiseaseRepository)
+
+        const diseaseList = await diseaseRepository.find()
+
+        return response.json(diseaseList)
+    }
 }
 
 export{DiseaseController}
