@@ -21,15 +21,18 @@ router.get("/patients/:patient_id", patientController.getOne)
 router.put("/patients/:patient_id", patientController.alterOne)
 router.delete("/patients/:patient_id", patientController.deleteOne)
 
+//USM routes
+router.get("/usm", usmController.list)
+
 router.post("/faq", faqController.create)
 router.post("/appointments", appointmentController.create)
-router.post("/usm", usmController.create)
+
 router.post("/vaccine", vaccineController.create)
 router.post("/disease", diseaseController.create)
 router.post("/healthprotocol", healthProtocolController.create)
 
 
-//Get routes
+
 
 
 //

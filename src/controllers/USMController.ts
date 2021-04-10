@@ -24,6 +24,14 @@ class USMController{
 
         return response.status(201).json(usm)
     }
+
+    async list(request: Request, response: Response){
+        const usmRepository = getCustomRepository(USMRepository)
+
+        const patientsList = await usmRepository.find()
+
+        return response.json(patientsList)
+    }
 }
 
 export {USMController}
