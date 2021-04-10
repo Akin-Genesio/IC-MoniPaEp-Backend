@@ -24,7 +24,7 @@ router.delete("/patients/:patient_id", patientController.deleteOne)
 //USM routes
 router.get("/usm", usmController.list)
 router.get("/usm/:usm_name", usmController.getOne)
-
+router.put("/usm/:usm_name", usmController.alterOne)
 
 router.post("/faq", faqController.create)
 router.post("/appointments", appointmentController.create)

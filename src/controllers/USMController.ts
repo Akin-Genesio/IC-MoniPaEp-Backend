@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { getCustomRepository } from "typeorm";
+import { USM } from "../models";
 import { USMRepository } from "../repositories";
 
 class USMController{
@@ -50,6 +51,31 @@ class USMController{
         }
 
         return response.status(302).json(usm)
+    }
+
+    async alterOne(request: Request, response: Response){
+        const body = request.body
+        const {usm_name} = request.params
+
+        const usmRepository = getCustomRepository(USMRepository)
+
+        const usm = await usmRepository.findOne({
+            name: usm_name
+        })
+        
+        if(!usm){
+            return response.status(404).json({
+                error: "USM not found"
+            })
+        }
+
+        usmRepository.createQueryBuilder()
+        .update(USM)
+        .set(body)
+        .where("name = :name", { name: usm_name })
+        .execute();
+
+        return response.status(200).json(body)
     }
 }
 
