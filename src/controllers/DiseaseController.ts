@@ -78,6 +78,31 @@ class DiseaseController{
 
         return response.status(200).json(body)
     }
+
+    async deleteOne(request: Request, response: Response){
+        const {disease_name} = request.params
+
+        const diseaseRepository = getCustomRepository(DiseaseRepository)
+
+
+        const disease = await diseaseRepository.findOne({
+            name: disease_name
+        })
+        
+        if(!disease){
+            return response.status(404).json({
+                error: "Disease not found"
+            })
+        }
+
+        diseaseRepository.createQueryBuilder()
+        .delete()
+        .from(Disease)
+        .where("name = :name", { name: disease_name })
+        .execute();
+
+        return response.status(200).json("Disease Deleted")
+    }
 }
 
 export{DiseaseController}
