@@ -28,9 +28,28 @@ class USMController{
     async list(request: Request, response: Response){
         const usmRepository = getCustomRepository(USMRepository)
 
-        const patientsList = await usmRepository.find()
+        const usmList = await usmRepository.find()
 
-        return response.json(patientsList)
+        return response.json(usmList)
+    }
+
+    async getOne(request: Request, response: Response){
+        const {usm_name} = request.params
+
+        const usmRepository = getCustomRepository(USMRepository)
+
+
+        const usm = await usmRepository.findOne({
+            name: usm_name
+        })
+        
+        if(!usm){
+            return response.status(404).json({
+                error: "USM not found"
+            })
+        }
+
+        return response.status(302).json(usm)
     }
 }
 
