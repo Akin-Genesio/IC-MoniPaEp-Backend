@@ -26,4 +26,5 @@ router.post("/healthprotocol", healthProtocolController.create)
 
 //Get routes
 router.get("/patients", patientController.list)
+router.get("/patients/:patient_id", patientController.getOne)
 export { router };
