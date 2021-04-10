@@ -1,7 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Disease } from "./Disease";
 
-
 @Entity("healthProtocols")
 class HealthProtocol{
     @PrimaryGeneratedColumn("uuid")

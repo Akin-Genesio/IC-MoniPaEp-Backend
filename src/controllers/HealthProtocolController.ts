@@ -1,32 +1,43 @@
 import { Request, Response } from "express";
 import { getCustomRepository } from "typeorm";
-import { DiseaseRepository, HealthProtocolRepository } from "../repositories";
+import { DiseaseRepository } from "../repositories";
+import { HealthProtocolRepository } from "../repositories/HealthProtocolRepository"
 
-
-class HealthProtocolController{
-    async create(request: Request, response: Response){
+class HealthProtocolController {
+    async create(request: Request, response: Response) {
         const body = request.body
+        body.disease_name = body.disease_name.trim()
 
-        const health_protocol_repository = getCustomRepository(HealthProtocolRepository)
-
+        const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
         const diseaseRepository = getCustomRepository(DiseaseRepository)
 
-        const diseaseExists = await diseaseRepository.findOne({
+        const IsValidDisease = await diseaseRepository.findOne({
             name: body.disease_name
         })
 
-        if(!diseaseExists){
-            return response.status(404).json({
-                error: "Invalid disease_name, disease not registered in the system"
+        if(!IsValidDisease) {
+            return response.status(400).json({
+                error: "Disease not found!"
+            })
+        }
+        
+        const alreadyExists = await healthProtocolRepository.findOne({
+            disease_name: body.disease_name
+        })
+
+        if(alreadyExists) {
+            return response.status(400).json({
+                error: "Health protocol has already been registered"
             })
         }
 
-        const health_protocol = health_protocol_repository.create(body)
+        const healthProtocol = healthProtocolRepository.create(body)
+        
+        await healthProtocolRepository.save(healthProtocol)
 
-        await health_protocol_repository.save(health_protocol)
-
-        return response.status(201).json(health_protocol)
+        return response.json(healthProtocol)
+        
     }
 }
 
-export {HealthProtocolController}
+export { HealthProtocolController }
