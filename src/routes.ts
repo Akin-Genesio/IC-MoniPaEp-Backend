@@ -31,6 +31,8 @@ router.delete("/usm/:usm_name", usmController.deleteOne)
 router.post("/disease", diseaseController.create)
 router.get("/disease", diseaseController.list)
 router.get("/disease/:disease_name", diseaseController.getOne)
+router.put("/disease/:disease_name", diseaseController.alterOne)
+
 
 router.post("/faq", faqController.create)
 router.post("/appointments", appointmentController.create)

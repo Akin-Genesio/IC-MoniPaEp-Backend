@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { getCustomRepository } from "typeorm";
+import { Disease } from "../models";
 import { DiseaseRepository } from "../repositories";
 
 class DiseaseController{
@@ -50,6 +51,32 @@ class DiseaseController{
         }
 
         return response.status(302).json(disease)
+    }
+
+    async alterOne(request: Request, response: Response){
+        const body = request.body
+        const {disease_name} = request.params
+
+        const diseaseRepository = getCustomRepository(DiseaseRepository)
+
+
+        const disease = await diseaseRepository.findOne({
+            name: disease_name
+        })
+        
+        if(!disease){
+            return response.status(404).json({
+                error: "Disease not found"
+            })
+        }
+
+        diseaseRepository.createQueryBuilder()
+        .update(Disease)
+        .set(body)
+        .where("name = :name", { name: disease_name })
+        .execute();
+
+        return response.status(200).json(body)
     }
 }
 
