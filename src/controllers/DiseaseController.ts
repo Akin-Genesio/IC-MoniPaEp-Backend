@@ -32,6 +32,25 @@ class DiseaseController{
 
         return response.json(diseaseList)
     }
+
+    async getOne(request: Request, response: Response){
+        const {disease_name} = request.params
+
+        const diseaseRepository = getCustomRepository(DiseaseRepository)
+
+
+        const disease = await diseaseRepository.findOne({
+            name: disease_name
+        })
+        
+        if(!disease){
+            return response.status(404).json({
+                error: "Disease not found"
+            })
+        }
+
+        return response.status(302).json(disease)
+    }
 }
 
 export{DiseaseController}
