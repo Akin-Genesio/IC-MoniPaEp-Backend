@@ -14,8 +14,13 @@ const vaccineController = new VaccineController()
 const diseaseController = new DiseaseController()
 const healthProtocolController = new HealthProtocolController()
 
-//Post routes
+//Patient routes
 router.post("/patients", patientController.create)
+router.get("/patients", patientController.list)
+router.get("/patients/:patient_id", patientController.getOne)
+router.put("/patients/:patient_id", patientController.alterOne)
+router.delete("/patients/:patient_id", patientController.deleteOne)
+
 router.post("/faq", faqController.create)
 router.post("/appointments", appointmentController.create)
 router.post("/usm", usmController.create)
@@ -25,6 +30,7 @@ router.post("/healthprotocol", healthProtocolController.create)
 
 
 //Get routes
-router.get("/patients", patientController.list)
-router.get("/patients/:patient_id", patientController.getOne)
+
+
+//
 export { router };
