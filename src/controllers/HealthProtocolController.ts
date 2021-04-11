@@ -33,6 +33,24 @@ class HealthProtocolController{
 
         return response.json(healthProtocolList)
     }
+
+    async getOne(request: Request, response: Response){
+        const {description} = request.params
+
+        const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
+
+        const health_protocol = await healthProtocolRepository.findOne({
+            description: description
+        })
+        
+        if(!health_protocol){
+            return response.status(404).json({
+                error: "Health Protocol not found"
+            })
+        }
+
+        return response.status(302).json(health_protocol)
+    }
 }
 
 export {HealthProtocolController}

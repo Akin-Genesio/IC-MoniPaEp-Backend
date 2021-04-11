@@ -45,7 +45,7 @@ router.delete("/vaccine/:vaccine_id", vaccineController.deleteOne)
 //Health Protocol Routes
 router.post("/healthprotocol", healthProtocolController.create)
 router.get("/healthprotocol", healthProtocolController.list)
-router.get("/healthprotocol", healthProtocolController.list)
+router.get("/healthprotocol/:description", healthProtocolController.getOne)
 
 
 
