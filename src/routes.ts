@@ -39,6 +39,8 @@ router.delete("/disease/:disease_name", diseaseController.deleteOne)
 router.post("/vaccine", vaccineController.create)
 router.get("/vaccine", vaccineController.list)
 router.get("/vaccine/:vaccine_id", vaccineController.getOne)
+router.put("/vaccine/:vaccine_id", vaccineController.alterOne)
+
 
 
 router.post("/faq", faqController.create)

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { getCustomRepository } from "typeorm";
+import { Vaccine } from "../models";
 import { PatientsRepository, USMRepository, VaccinesRepository } from "../repositories";
 
 class VaccineController{
@@ -62,6 +63,32 @@ class VaccineController{
 
         return response.status(302).json(vaccine)
     }
+
+    async alterOne(request: Request, response: Response){
+        const body = request.body
+        const {vaccine_id} = request.params
+
+        const vaccineRepository = getCustomRepository(VaccinesRepository)
+
+        const vaccine = await vaccineRepository.findOne({
+            id: vaccine_id
+        })
+        
+        if(!vaccine){
+            return response.status(404).json({
+                error: "Vaccine not found"
+            })
+        }
+
+        vaccineRepository.createQueryBuilder()
+        .update(Vaccine)
+        .set(body)
+        .where("id = :id", { id: vaccine_id })
+        .execute();
+
+        return response.status(200).json(body)
+    }
+
 }
 
 export { VaccineController}
