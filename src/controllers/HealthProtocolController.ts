@@ -9,15 +9,13 @@ class HealthProtocolController{
 
         const health_protocol_repository = getCustomRepository(HealthProtocolRepository)
 
-        const diseaseRepository = getCustomRepository(DiseaseRepository)
-
-        const diseaseExists = await diseaseRepository.findOne({
-            name: body.disease_name
+        const healthProtocolAlreadyExists = await health_protocol_repository.findOne({
+            description: body.description
         })
 
-        if(!diseaseExists){
-            return response.status(404).json({
-                error: "Invalid disease_name, disease not registered in the system"
+        if(healthProtocolAlreadyExists){
+            return response.status(400).json({
+                error: "Health Protocol already exists"
             })
         }
 
