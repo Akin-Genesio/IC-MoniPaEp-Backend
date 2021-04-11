@@ -44,6 +44,24 @@ class VaccineController{
 
         return response.json(vaccineList)
     }
+
+    async getOne(request: Request, response: Response){
+        const {vaccine_id} = request.params
+
+        const vaccineRepository = getCustomRepository(VaccinesRepository)
+
+        const vaccine = await vaccineRepository.findOne({
+            id: vaccine_id
+        })
+        
+        if(!vaccine){
+            return response.status(404).json({
+                error: "Vaccine not found"
+            })
+        }
+
+        return response.status(302).json(vaccine)
+    }
 }
 
 export { VaccineController}
