@@ -22,6 +22,7 @@ router.put("/patients/:patient_id", patientController.alterOne)
 router.delete("/patients/:patient_id", patientController.deleteOne)
 
 //USM routes
+router.post("/usm", usmController.create)
 router.get("/usm", usmController.list)
 router.get("/usm/:usm_name", usmController.getOne)
 router.put("/usm/:usm_name", usmController.alterOne)
@@ -33,6 +34,10 @@ router.get("/disease", diseaseController.list)
 router.get("/disease/:disease_name", diseaseController.getOne)
 router.put("/disease/:disease_name", diseaseController.alterOne)
 router.delete("/disease/:disease_name", diseaseController.deleteOne)
+
+//Vaccine Routes
+router.post("/vaccine", vaccineController.create)
+router.get("/vaccine", vaccineController.list)
 
 
 router.post("/faq", faqController.create)

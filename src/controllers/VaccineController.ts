@@ -36,6 +36,14 @@ class VaccineController{
 
         return response.status(201).json(vaccine)
     }
+
+    async list(request: Request, response: Response){
+        const vaccineRepository = getCustomRepository(VaccinesRepository)
+
+        const vaccineList = await vaccineRepository.find()
+
+        return response.json(vaccineList)
+    }
 }
 
 export { VaccineController}
