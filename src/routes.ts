@@ -47,6 +47,7 @@ router.post("/healthprotocol", healthProtocolController.create)
 router.get("/healthprotocol", healthProtocolController.list)
 router.get("/healthprotocol/:description", healthProtocolController.getOne)
 router.put("/healthprotocol/:description", healthProtocolController.alterOne)
+router.delete("/healthprotocol/:description", healthProtocolController.deleteOne)
 
 
 

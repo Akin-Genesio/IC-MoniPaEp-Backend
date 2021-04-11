@@ -77,6 +77,30 @@ class HealthProtocolController{
 
         return response.status(200).json(body)
     }
+
+    async deleteOne(request: Request, response: Response){
+        const {description} = request.params
+
+        const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
+
+        const health_protocol = await healthProtocolRepository.findOne({
+            description: description
+        })
+        
+        if(!health_protocol){
+            return response.status(404).json({
+                error: "Health Protocol not found"
+            })
+        }
+
+        healthProtocolRepository.createQueryBuilder()
+        .delete()
+        .from(HealthProtocol)
+        .where("description = :description", { description: description })
+        .execute();
+
+        return response.status(200).json("Health Protocol Deleted")
+    }
 }
 
 export {HealthProtocolController}
