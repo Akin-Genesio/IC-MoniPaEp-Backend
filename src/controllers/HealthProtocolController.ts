@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { getCustomRepository } from "typeorm";
+import { HealthProtocol } from "../models";
 import { DiseaseRepository, HealthProtocolRepository } from "../repositories";
 
 
@@ -50,6 +51,31 @@ class HealthProtocolController{
         }
 
         return response.status(302).json(health_protocol)
+    }
+
+    async alterOne(request: Request, response: Response){
+        const body = request.body
+        const {description} = request.params
+
+        const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
+
+        const health_protocol = await healthProtocolRepository.findOne({
+            description: description
+        })
+        
+        if(!health_protocol){
+            return response.status(404).json({
+                error: "Health Protocol not found"
+            })
+        }
+
+        healthProtocolRepository.createQueryBuilder()
+        .update(HealthProtocol)
+        .set(body)
+        .where("description = :description", { description: description })
+        .execute();
+
+        return response.status(200).json(body)
     }
 }
 
