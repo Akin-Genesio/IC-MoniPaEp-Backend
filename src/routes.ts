@@ -42,14 +42,15 @@ router.get("/vaccine/:vaccine_id", vaccineController.getOne)
 router.put("/vaccine/:vaccine_id", vaccineController.alterOne)
 router.delete("/vaccine/:vaccine_id", vaccineController.deleteOne)
 
+//Health Protocol Routes
+router.post("/healthprotocol", healthProtocolController.create)
+router.get("/healthprotocol", healthProtocolController.list)
+
 
 
 router.post("/faq", faqController.create)
 router.post("/appointments", appointmentController.create)
 
-router.post("/vaccine", vaccineController.create)
-
-router.post("/healthprotocol", healthProtocolController.create)
 
 
 

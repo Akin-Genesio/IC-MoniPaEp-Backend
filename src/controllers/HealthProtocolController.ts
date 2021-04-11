@@ -27,6 +27,14 @@ class HealthProtocolController{
 
         return response.status(201).json(health_protocol)
     }
+
+    async list(request: Request, response: Response){
+        const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
+
+        const healthProtocolList = await healthProtocolRepository.find()
+
+        return response.json(healthProtocolList)
+    }
 }
 
 export {HealthProtocolController}
