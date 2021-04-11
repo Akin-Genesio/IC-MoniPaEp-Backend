@@ -89,6 +89,30 @@ class VaccineController{
         return response.status(200).json(body)
     }
 
+    async deleteOne(request: Request, response: Response){
+        const {vaccine_id} = request.params
+
+        const vaccineRepository = getCustomRepository(VaccinesRepository)
+
+        const vaccine = await vaccineRepository.findOne({
+            id: vaccine_id
+        })
+        
+        if(!vaccine){
+            return response.status(404).json({
+                error: "Vaccine not found"
+            })
+        }
+
+        vaccineRepository.createQueryBuilder()
+        .delete()
+        .from(Vaccine)
+        .where("id = :id", { id: vaccine_id })
+        .execute();
+
+        return response.status(200).json("Vaccine Deleted")
+    }
+
 }
 
 export { VaccineController}
