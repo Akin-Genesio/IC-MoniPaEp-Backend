@@ -1,25 +1,24 @@
 import {MigrationInterface, QueryRunner, Table} from "typeorm";
 
-export class HealthProtocol1617234652026 implements MigrationInterface {
+export class Symptom1617298780801 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.createTable(
             new Table({
-                name: "healthProtocols",
-                columns:[
+                name: "symptom",
+                columns: [
                     {
-                        name: "description",
+                        name: "symptom",
                         type: "varchar",
-                        isPrimary: true
+                        isPrimary: true,
                     }
-                ],
-
+                ]
             })
         )
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.dropTable("healthProtocols")
+        await queryRunner.dropTable("symptom")
     }
 
 }
