@@ -1,21 +1,21 @@
 import { Entity, JoinColumn, PrimaryColumn } from "typeorm";
+import { Disease } from ".";
 import { HealthProtocol } from "./HealthProtocol";
-import { Patient } from "./Patient";
 
 @Entity("assigned_healthprotocol")
 class AssignedHealthProtocol {
     @PrimaryColumn()
-    patient_id: string;
+    disease_name: string;
 
-    @JoinColumn({name: "patient_id"})
-    patient: Patient
+    @JoinColumn({name: "disease_name"})
+    disease: Disease
 
     @PrimaryColumn()
-    healthprotocol_id: string;
+    healthprotocol_description: string;
 
-    @JoinColumn({name: "healthprotocol_id"})
+    @JoinColumn({name: "healthprotocol_description"})
     healthprotocol: HealthProtocol
 
 }
 
-export { AssignedHealthProtocol }
+export { AssignedHealthProtocol };

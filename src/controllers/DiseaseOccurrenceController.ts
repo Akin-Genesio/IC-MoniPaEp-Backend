@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { getCustomRepository } from "typeorm";
-import { DiseaseOccurrenceRepository, PatientsRepository } from "../repositories";
+import { DiseaseOccurrenceRepository, DiseaseRepository, PatientsRepository } from "../repositories";
 
 class DiseaseOccurrenceController {
     async create(request: Request, response: Response) {
@@ -8,14 +8,25 @@ class DiseaseOccurrenceController {
 
         const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
         const patientsRepository = getCustomRepository(PatientsRepository)
+        const diseasesRepository = getCustomRepository(DiseaseRepository)
 
-        const IsValidId = await patientsRepository.findOne({
+        const patientExists = await patientsRepository.findOne({
             id: body.patient_id
         })
 
-        if(!IsValidId) {
+        if(!patientExists) {
             return response.status(400).json({
                 error: "Patient id is not valid!"
+            })
+        }
+
+        const diseaseExists = await diseasesRepository.findOne({
+            name: body.disease_name
+        })
+
+        if(!diseaseExists) {
+            return response.status(400).json({
+                error: "Disease name is not valid!"
             })
         }
 

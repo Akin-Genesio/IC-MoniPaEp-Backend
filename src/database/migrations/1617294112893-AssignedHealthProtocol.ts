@@ -8,30 +8,30 @@ export class AssignedHealthProtocol1617294112893 implements MigrationInterface {
                 name: "assigned_healthprotocol",
                 columns: [
                     {
-                        name: "patient_id",
-                        type: "uuid",
+                        name: "disease_name",
+                        type: "varchar",
                         isPrimary: true
                     },
                     {
-                        name: "healthprotocol_id",
-                        type: "uuid",
+                        name: "healthprotocol_description",
+                        type: "varchar",   
                         isPrimary: true
                     }
                 ],
                 foreignKeys: [
                     {
-                        name: "FKPatient",
-                        referencedTableName: "patients",
-                        referencedColumnNames: ["id"],
-                        columnNames: ["patient_id"],
+                        name: "FKDisease",
+                        referencedTableName: "disease",
+                        referencedColumnNames: ["name"],
+                        columnNames: ["disease_name"],
                         onUpdate: "CASCADE",
                         onDelete: "CASCADE"
                     },
                     {
                         name: "FKHealthProtocol",
                         referencedTableName: "healthProtocols",
-                        referencedColumnNames: ["id"],
-                        columnNames: ["healthprotocol_id"],
+                        referencedColumnNames: ["description"],
+                        columnNames: ["healthprotocol_description"],
                         onUpdate: "CASCADE",
                         onDelete: "CASCADE"
                     }

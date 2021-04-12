@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { getCustomRepository } from "typeorm";
-import { PatientsRepository } from "../repositories";
+import { DiseaseRepository, PatientsRepository } from "../repositories";
 import { AssignedHealthProtocolRepository } from "../repositories/AssignedHealthProtocolRepository";
 import { HealthProtocolRepository } from "../repositories/HealthProtocolRepository";
 
@@ -10,37 +10,15 @@ class AssignedHealthProtocolController {
 
         const assignedHealthProtocolRepository = getCustomRepository(AssignedHealthProtocolRepository)
         const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
-        const patientsRepository = getCustomRepository(PatientsRepository)
 
-        const patientExists = await patientsRepository.findOne({
-            id: body.patient_id
-        })
-
-        if(!patientExists) {
-            return response.status(400).json({
-                error: "Patient is not valid"
-            })
-        }
 
         const healthProtocolExists = await healthProtocolRepository.findOne({
-            id: body.healthprotocol_id
+            description: body.healthprotocol_description
         })
         
         if(!healthProtocolExists) {
             return response.status(400).json({
                 error: "Health protocol is not valid"
-            })
-        }
-
-        const assignedHealthProtocolAlreadyExists = await assignedHealthProtocolRepository.findOne({
-            patient_id: body.patient_id,
-            healthprotocol_id: body.healthprotocol_id
-        })
-
-
-        if(assignedHealthProtocolAlreadyExists) {
-            return response.status(400).json({
-                error: "Health protocol has already been assigned"
             })
         }
 
