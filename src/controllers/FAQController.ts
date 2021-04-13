@@ -8,6 +8,16 @@ class FAQController{
         
         const faqRepository = getCustomRepository(FAQRepository)
 
+        const FaqAlreadyExists = faqRepository.findOne({
+            question: body.question
+        })
+
+        if(FaqAlreadyExists){
+            return response.status(400).json({
+                error: "Question already registered!"
+            })
+        }
+
         const FAQ = faqRepository.create(body)
 
         await faqRepository.save(FAQ)

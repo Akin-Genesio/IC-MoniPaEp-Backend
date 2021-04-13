@@ -69,9 +69,15 @@ router.post("/appointments", appointmentController.create)
 
 
 
-//
-router.post("/assignedhealthprotocol", assignedHealthProtocolController.create)
+//Symptom Routes
 router.post("/symptom", symptomController.create)
+router.get("/symptom", symptomController.list)
+router.get("/symptom/:symptom_name", symptomController.getOne)
+router.put("/symptom/:symptom_name", symptomController.alterOne)
+router.delete("/symptom/:symptom_name", symptomController.deleteOne)
+
+router.post("/assignedhealthprotocol", assignedHealthProtocolController.create)
+
 router.post("/diseaseoccurrence", diseaseOccurrenceController.create)
 router.post("/symptomoccurrence", symptomOccurrenceController.create)
 router.post("/patientmovementhistory", patientMovementHistoryController.create)
