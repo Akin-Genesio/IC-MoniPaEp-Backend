@@ -9,6 +9,15 @@ class HealthProtocolController {
         //body.disease_name = body.disease_name.trim()
 
         const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
+        const IsAlreadyRegistered = healthProtocolRepository.findOne({
+            description: body.description
+        })
+
+        if (IsAlreadyRegistered) {
+            return response.status(400).json({
+                error: "Health protocol has already been registered!"
+            })
+        }
 
         const healthProtocol = healthProtocolRepository.create(body)
         
