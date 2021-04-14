@@ -76,10 +76,20 @@ router.get("/symptom/:symptom_name", symptomController.getOne)
 router.put("/symptom/:symptom_name", symptomController.alterOne)
 router.delete("/symptom/:symptom_name", symptomController.deleteOne)
 
+//DiseaseOccurrence Routes
+router.post("/diseaseoccurrence", diseaseOccurrenceController.create)
+router.get("/diseaseoccurrence", diseaseOccurrenceController.list)
+router.get("/diseaseoccurrence/:id", diseaseOccurrenceController.getOne)
+router.put("/diseaseoccurrence/:id", diseaseOccurrenceController.alterOne)
+router.delete("/diseaseoccurrence/:id", diseaseOccurrenceController.deleteOne)
+
+//SymptomOccurrence Routes
+router.post("/symptomoccurrence", symptomOccurrenceController.create)
+
+//AssignedHealthProtocol Routes
 router.post("/assignedhealthprotocol", assignedHealthProtocolController.create)
 
-router.post("/diseaseoccurrence", diseaseOccurrenceController.create)
-router.post("/symptomoccurrence", symptomOccurrenceController.create)
+//PatientMovementHistory Routes
 router.post("/patientmovementhistory", patientMovementHistoryController.create)
 
 export { router };
