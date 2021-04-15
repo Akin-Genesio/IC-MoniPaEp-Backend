@@ -72,7 +72,6 @@ router.post("/appointments", appointmentController.create)
 //Symptom Routes
 router.post("/symptom", symptomController.create)
 router.get("/symptom", symptomController.list)
-router.get("/symptom/:symptom_name", symptomController.getOne)
 router.put("/symptom/:symptom_name", symptomController.alterOne)
 router.delete("/symptom/:symptom_name", symptomController.deleteOne)
 
@@ -85,6 +84,9 @@ router.delete("/diseaseoccurrence/:id", diseaseOccurrenceController.deleteOne)
 
 //SymptomOccurrence Routes
 router.post("/symptomoccurrence", symptomOccurrenceController.create)
+router.get("/symptomoccurrence", symptomOccurrenceController.list)
+router.put("/symptomoccurrence/:disease_occurrence_id/:symptom_name", symptomOccurrenceController.alterOne)
+router.delete("/symptomoccurrence/:disease_occurrence_id/:symptom_name", symptomOccurrenceController.deleteOne)
 
 //AssignedHealthProtocol Routes
 router.post("/assignedhealthprotocol", assignedHealthProtocolController.create)
@@ -92,7 +94,6 @@ router.post("/assignedhealthprotocol", assignedHealthProtocolController.create)
 //PatientMovementHistory Routes
 router.post("/patientmovementhistory", patientMovementHistoryController.create)
 router.get("/patientmovementhistory", patientMovementHistoryController.list)
-router.get("/patientmovementhistory/:disease_occurrence_id", patientMovementHistoryController.getOne)
 router.put("/patientmovementhistory/:disease_occurrence_id/:description", patientMovementHistoryController.alterOne)
 router.delete("/patientmovementhistory/:disease_occurrence_id/:description", patientMovementHistoryController.deleteOne)
 

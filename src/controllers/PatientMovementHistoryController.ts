@@ -15,7 +15,7 @@ class PatientMovementHistoryController {
         })
 
         if (!IsValidDiseaseOccurrence) {
-            return response.status(400).json({
+            return response.status(404).json({
                 error: "Disease occurrence id is not valid!"
             })
         }
@@ -24,54 +24,64 @@ class PatientMovementHistoryController {
 
         await patientMovementRepository.save(patientMovementHistory)
 
-        return response.json(patientMovementHistory)
+        return response.status(201).json(patientMovementHistory)
     }
 
     async list(request: Request, response: Response) {
+        const {disease_occurrence_id, description} = request.query
         const patientMovementRepository = getCustomRepository(PatientMovementHistoryRepository)
         
-        const movementHistory = await patientMovementRepository.find()
+        if(!disease_occurrence_id && !description) {
+            const movementHistory = await patientMovementRepository.find()
+            return response.status(200).json(movementHistory)
+        } else if (disease_occurrence_id && !description) {
+            const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
 
-        return response.status(200).json(movementHistory)
-    }
-
-    async getOne(request: Request, response: Response) {
-        const {disease_occurrence_id} = request.params
-        const {description} = request.query
-
-        const patientMovementRepository = getCustomRepository(PatientMovementHistoryRepository)
-        const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
-        
-        const isValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
-            id: disease_occurrence_id
-        })
-
-        if (!isValidDiseaseOccurrence) {
-            return response.status(404).json({
-                error: "Disease occurrence is not valid"
+            const isValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
+                id: String(disease_occurrence_id)
             })
-        }
 
-        if(description) {
-            const movementHistoryItem = await patientMovementRepository.findOne({
-                disease_occurrence_id: disease_occurrence_id,
+            if (!isValidDiseaseOccurrence) {
+                return response.status(404).json({
+                    error: "Disease occurrence is not valid"
+                })
+            }
+
+            const movementHistoryList = await patientMovementRepository.find({
+                disease_occurrence_id: String(disease_occurrence_id)
+            })
+
+            return response.status(200).json(movementHistoryList)
+
+        } else if(!disease_occurrence_id && description) {          
+            const movementHistoryList = await patientMovementRepository.find({
                 description: String(description)
             })
 
-            if(!movementHistoryItem) {
+            return response.status(200).json(movementHistoryList)
+
+        } else {
+            const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
+
+            const isValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
+                id: String(disease_occurrence_id)
+            })
+
+            if (!isValidDiseaseOccurrence) {
                 return response.status(404).json({
-                    error: "Movement history not found for this disease occurrence"
+                    error: "Disease occurrence is not valid"
                 })
             }
-    
+
+            const movementHistoryItem = await patientMovementRepository.findOne({
+                disease_occurrence_id: String(disease_occurrence_id),
+                description: String(description)
+            })
+
             return response.status(200).json(movementHistoryItem)
+
         }
-
-        const movementHistoryList = await patientMovementRepository.find({
-            disease_occurrence_id: disease_occurrence_id
-        })
-
-        return response.status(200).json(movementHistoryList)
+        
     }
 
     async alterOne(request: Request, response: Response) {

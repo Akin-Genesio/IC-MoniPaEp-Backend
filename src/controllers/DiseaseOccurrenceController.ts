@@ -16,7 +16,7 @@ class DiseaseOccurrenceController {
         })
 
         if(!patientExists) {
-            return response.status(400).json({
+            return response.status(404).json({
                 error: "Patient id is not valid!"
             })
         }
@@ -26,7 +26,7 @@ class DiseaseOccurrenceController {
         })
 
         if(!diseaseExists) {
-            return response.status(400).json({
+            return response.status(404).json({
                 error: "Disease name is not valid!"
             })
         }
@@ -35,7 +35,7 @@ class DiseaseOccurrenceController {
 
         await diseaseOccurrenceRepository.save(diseaseOccurrence)
 
-        return response.json(diseaseOccurrence)
+        return response.status(201).json(diseaseOccurrence)
 
     }
 

@@ -14,7 +14,7 @@ class SymptomController {
         })
 
         if(symptomAlreadyExists) {
-            return response.status(400).json({
+            return response.status(404).json({
                 error: "Symptom has already been registered"
             })
         }
@@ -28,27 +28,33 @@ class SymptomController {
     }
 
     async list(request: Request, response: Response){
+        const {symptom_name} = request.query
+        
         const symptomRepository = getCustomRepository(SymptomRepository)
-        const symptomsList = await symptomRepository.find()
+        
+        if(!symptom_name) {
+            const symptomsList = await symptomRepository.find()
+            return response.status(200).json(symptomsList)
+        } else {
+            const symptomRepository = getCustomRepository(SymptomRepository)
 
-        return response.status(200).json(symptomsList)
-    }
-
-    async getOne(request: Request, response: Response) {
-        const {symptom_name} = request.params
-
-        const symptomRepository = getCustomRepository(SymptomRepository)
-        const symptom = await symptomRepository.findOne({
-            symptom: symptom_name
-        })
-
-        if(!symptom){
-            return response.status(404).json({
-                error: "Symptom not found"
+            const symptom = await symptomRepository.findOne({
+                symptom: String(symptom_name)
             })
-        }
+    
+            if(!symptom){
+                return response.status(404).json({
+                    error: "Symptom not found"
+                })
+            }
 
-        return response.status(302).json(symptom)
+            const symptomsList = await symptomRepository.find({
+                symptom: String(symptom_name)
+            })
+
+            return response.status(200).json(symptomsList)
+        }
+        
     }
 
     async alterOne(request: Request, response: Response) {
