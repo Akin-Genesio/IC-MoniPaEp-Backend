@@ -91,5 +91,10 @@ router.post("/assignedhealthprotocol", assignedHealthProtocolController.create)
 
 //PatientMovementHistory Routes
 router.post("/patientmovementhistory", patientMovementHistoryController.create)
+router.get("/patientmovementhistory", patientMovementHistoryController.list)
+router.get("/patientmovementhistory/:disease_occurrence_id", patientMovementHistoryController.getOne)
+router.put("/patientmovementhistory/:disease_occurrence_id/:description", patientMovementHistoryController.alterOne)
+router.delete("/patientmovementhistory/:disease_occurrence_id/:description", patientMovementHistoryController.deleteOne)
+
 
 export { router };
