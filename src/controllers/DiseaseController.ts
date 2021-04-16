@@ -31,7 +31,7 @@ class DiseaseController{
 
         const diseaseList = await diseaseRepository.find()
 
-        return response.json(diseaseList)
+        return response.status(200).json(diseaseList)
     }
 
     async getOne(request: Request, response: Response){
