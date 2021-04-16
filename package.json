@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "ts-node-dev --transpile-only --ignore-watch node_modules ./src/server.ts",
+    "dev": "ts-node-dev -r tsconfig-paths/register --transpile-only --ignore-watch node_modules  ./src/server.ts",
     "commit": "git add .& cz",
     "typeorm": "ts-node-dev node_modules/typeorm/cli.js",
     "test": "NODE_ENV=test jest"
@@ -30,6 +30,7 @@
     "express": "^4.17.1",
     "reflect-metadata": "^0.1.13",
     "sqlite3": "^5.0.2",
+    "tsconfig-paths": "^3.9.0",
     "typeorm": "^0.2.31",
     "uuid": "^8.3.2",
     "yarn": "^1.22.10"
