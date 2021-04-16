@@ -24,21 +24,21 @@ const diseaseOccurrenceController = new DiseaseOccurrenceController()
 const symptomOccurrenceController = new SymptomOccurrenceController()
 const patientMovementHistoryController = new PatientMovementHistoryController()
 
-//Patient routes
+//Patient Routes
 router.post("/patients", patientController.create)
 router.get("/patients", patientController.list)
 router.get("/patients/:patient_id", patientController.getOne)
 router.put("/patients/:patient_id", patientController.alterOne)
 router.delete("/patients/:patient_id", patientController.deleteOne)
 
-//USM routes
+//USM Routes
 router.post("/usm", usmController.create)
 router.get("/usm", usmController.list)
 router.get("/usm/:usm_name", usmController.getOne)
 router.put("/usm/:usm_name", usmController.alterOne)
 router.delete("/usm/:usm_name", usmController.deleteOne)
 
-//Disease routes
+//Disease Routes
 router.post("/disease", diseaseController.create)
 router.get("/disease", diseaseController.list)
 router.get("/disease/:disease_name", diseaseController.getOne)
@@ -59,15 +59,8 @@ router.get("/healthprotocol/:description", healthProtocolController.getOne)
 router.put("/healthprotocol/:description", healthProtocolController.alterOne)
 router.delete("/healthprotocol/:description", healthProtocolController.deleteOne)
 
-
-
-router.post("/faq", faqController.create)
+//Appointments Routes
 router.post("/appointments", appointmentController.create)
-
-
-
-
-
 
 //Symptom Routes
 router.post("/symptom", symptomController.create)
@@ -96,6 +89,12 @@ router.post("/patientmovementhistory", patientMovementHistoryController.create)
 router.get("/patientmovementhistory", patientMovementHistoryController.list)
 router.put("/patientmovementhistory/:disease_occurrence_id/:description", patientMovementHistoryController.alterOne)
 router.delete("/patientmovementhistory/:disease_occurrence_id/:description", patientMovementHistoryController.deleteOne)
+
+//FAQ Routes
+router.post("/faq", faqController.create)
+router.get("/faq", faqController.list)
+router.put("/faq/:question", faqController.alterOne)
+router.delete("/faq/:question", faqController.deleteOne)
 
 
 export { router };

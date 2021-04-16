@@ -36,8 +36,6 @@ class SymptomController {
             const symptomsList = await symptomRepository.find()
             return response.status(200).json(symptomsList)
         } else {
-            const symptomRepository = getCustomRepository(SymptomRepository)
-
             const symptom = await symptomRepository.findOne({
                 symptom: String(symptom_name)
             })
