@@ -78,4 +78,40 @@ describe("USM", () =>{
             expect(response.status).toBe(200)
         })
     })
+    describe("Failure Cases", () =>{
+        it("Should not create a new USM with if the name is already registered", async () =>{
+            const repeat = await request(app).post("/usm").send({
+                name: "FailureTest",
+                address: "13050023"
+            })
+
+            const response = await request(app).post("/usm").send({
+                name: "FailureTest",
+                address: "13050023"
+            })
+            expect(response.status).toBe(400)
+        })
+
+        it("Should return a message error if try get a USM that doesn't exist", async () =>{
+            
+            const response = await request(app).get(`/usm/FailureGetTest`).send()
+
+            expect(response.status).toBe(404)
+        })
+
+        it("Should return a message error if try to alter one USM that doesn't exist", async () =>{
+        
+            const response = await request(app).put(`/usm/FailurePutTest`).send({
+                name: "alteredTest",
+                address: "123"
+            })
+            expect(response.status).toBe(404)
+        })
+
+        it("Should return a message error if try to delete one USM that doesn't exist", async () =>{
+        
+            const response = await request(app).delete(`/usm/FailureDeleteTest`).send()
+            expect(response.status).toBe(404)
+        })
+    })
 })
