@@ -59,7 +59,7 @@ router.get("/healthprotocol/:description", healthProtocolController.getOne)
 router.put("/healthprotocol/:description", healthProtocolController.alterOne)
 router.delete("/healthprotocol/:description", healthProtocolController.deleteOne)
 
-//Appointments Routes
+//Appointments Routes - missing get, put and delete
 router.post("/appointments", appointmentController.create)
 
 //Symptom Routes
@@ -83,6 +83,8 @@ router.delete("/symptomoccurrence/:disease_occurrence_id/:symptom_name", symptom
 
 //AssignedHealthProtocol Routes
 router.post("/assignedhealthprotocol", assignedHealthProtocolController.create)
+router.get("/assignedhealthprotocol", assignedHealthProtocolController.list)
+router.delete("/assignedhealthprotocol/:disease_name/:healthprotocol_description", assignedHealthProtocolController.deleteOne)
 
 //PatientMovementHistory Routes
 router.post("/patientmovementhistory", patientMovementHistoryController.create)
