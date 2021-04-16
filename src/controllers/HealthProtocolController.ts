@@ -9,7 +9,7 @@ class HealthProtocolController {
         //body.disease_name = body.disease_name.trim()
 
         const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
-        const IsAlreadyRegistered = healthProtocolRepository.findOne({
+        const IsAlreadyRegistered = await healthProtocolRepository.findOne({
             description: body.description
         })
 
@@ -23,7 +23,7 @@ class HealthProtocolController {
         
         await healthProtocolRepository.save(healthProtocol)
 
-        return response.json(healthProtocol)
+        return response.status(201).json(healthProtocol)
         
     }
 
