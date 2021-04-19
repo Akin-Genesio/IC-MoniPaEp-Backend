@@ -52,15 +52,15 @@ describe("FAQ", () => {
             const faqRepository = getCustomRepository(FAQRepository)
 
             const newFAQ = await request(app).post("/faq").send({
-                question: "Question 2",
-                answer: "Answer 2"
+                question: "Question 3",
+                answer: "Answer 3"
             })
 
-            const faq = await faqRepository.findOne({question: "Question 2"})
+            const faq = await faqRepository.findOne({question: "Question 3"})
             
             const response = await request(app).put(`/faq/${faq.question}`).send({
-                question: "Question 2 modified",
-                answer: "Answer 2"
+                question: "Question 3 modified",
+                answer: "Answer 3"
             })
 
             expect(response.status).toBe(200)
@@ -70,11 +70,11 @@ describe("FAQ", () => {
             const faqRepository = getCustomRepository(FAQRepository)
 
             const newFAQ = await request(app).post("/faq").send({
-                question: "Question 2",
-                answer: "Answer 2"
+                question: "Question 4",
+                answer: "Answer 4"
             })
 
-            const faq = await faqRepository.findOne({question: "Question 2"})
+            const faq = await faqRepository.findOne({question: "Question 4"})
             
             const response = await request(app).delete(`/faq/${faq.question}`).send()
 

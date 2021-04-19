@@ -14,7 +14,7 @@ class SymptomController {
         })
 
         if(symptomAlreadyExists) {
-            return response.status(404).json({
+            return response.status(406).json({
                 error: "Symptom has already been registered"
             })
         }
