@@ -23,6 +23,7 @@ describe("Patient", () => {
         const response = await request(app).post("/patients").send({
             name: "Akin",
             email: "akin@email.com",
+            password: "123",
             lastGPSLocation: "123",
             allowSMS: true,
             workAddress: "321",
