@@ -24,21 +24,21 @@ const diseaseOccurrenceController = new DiseaseOccurrenceController()
 const symptomOccurrenceController = new SymptomOccurrenceController()
 const patientMovementHistoryController = new PatientMovementHistoryController()
 
-//Patient routes
+//Patient Routes
 router.post("/patients", patientController.create)
 router.get("/patients", patientController.list)
 router.get("/patients/:patient_id", patientController.getOne)
 router.put("/patients/:patient_id", patientController.alterOne)
 router.delete("/patients/:patient_id", patientController.deleteOne)
 
-//USM routes
+//USM Routes
 router.post("/usm", usmController.create)
 router.get("/usm", usmController.list)
 router.get("/usm/:usm_name", usmController.getOne)
 router.put("/usm/:usm_name", usmController.alterOne)
 router.delete("/usm/:usm_name", usmController.deleteOne)
 
-//Disease routes
+//Disease Routes
 router.post("/disease", diseaseController.create)
 router.get("/disease", diseaseController.list)
 router.get("/disease/:disease_name", diseaseController.getOne)
@@ -59,21 +59,44 @@ router.get("/healthprotocol/:description", healthProtocolController.getOne)
 router.put("/healthprotocol/:description", healthProtocolController.alterOne)
 router.delete("/healthprotocol/:description", healthProtocolController.deleteOne)
 
-
-
-router.post("/faq", faqController.create)
+//Appointments Routes - missing get, put and delete
 router.post("/appointments", appointmentController.create)
 
-
-
-
-
-
-//
-router.post("/assignedhealthprotocol", assignedHealthProtocolController.create)
+//Symptom Routes
 router.post("/symptom", symptomController.create)
+router.get("/symptom", symptomController.list)
+router.put("/symptom/:symptom_name", symptomController.alterOne)
+router.delete("/symptom/:symptom_name", symptomController.deleteOne)
+
+//DiseaseOccurrence Routes
 router.post("/diseaseoccurrence", diseaseOccurrenceController.create)
+router.get("/diseaseoccurrence", diseaseOccurrenceController.list)
+router.get("/diseaseoccurrence/:id", diseaseOccurrenceController.getOne)
+router.put("/diseaseoccurrence/:id", diseaseOccurrenceController.alterOne)
+router.delete("/diseaseoccurrence/:id", diseaseOccurrenceController.deleteOne)
+
+//SymptomOccurrence Routes
 router.post("/symptomoccurrence", symptomOccurrenceController.create)
+router.get("/symptomoccurrence", symptomOccurrenceController.list)
+router.put("/symptomoccurrence/:disease_occurrence_id/:symptom_name", symptomOccurrenceController.alterOne)
+router.delete("/symptomoccurrence/:disease_occurrence_id/:symptom_name", symptomOccurrenceController.deleteOne)
+
+//AssignedHealthProtocol Routes
+router.post("/assignedhealthprotocol", assignedHealthProtocolController.create)
+router.get("/assignedhealthprotocol", assignedHealthProtocolController.list)
+router.delete("/assignedhealthprotocol/:disease_name/:healthprotocol_description", assignedHealthProtocolController.deleteOne)
+
+//PatientMovementHistory Routes
 router.post("/patientmovementhistory", patientMovementHistoryController.create)
+router.get("/patientmovementhistory", patientMovementHistoryController.list)
+router.put("/patientmovementhistory/:disease_occurrence_id/:description", patientMovementHistoryController.alterOne)
+router.delete("/patientmovementhistory/:disease_occurrence_id/:description", patientMovementHistoryController.deleteOne)
+
+//FAQ Routes
+router.post("/faq", faqController.create)
+router.get("/faq", faqController.list)
+router.put("/faq/:question", faqController.alterOne)
+router.delete("/faq/:question", faqController.deleteOne)
+
 
 export { router };

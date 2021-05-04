@@ -6,7 +6,6 @@ import { HealthProtocolRepository } from "../repositories/HealthProtocolReposito
 class HealthProtocolController {
     async create(request: Request, response: Response) {
         const body = request.body
-        //body.disease_name = body.disease_name.trim()
 
         const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
         const IsAlreadyRegistered = await healthProtocolRepository.findOne({
