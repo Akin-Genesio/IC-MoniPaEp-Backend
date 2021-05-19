@@ -69,12 +69,18 @@ class USMController{
             })
         }
 
-        usmRepository.createQueryBuilder()
-        .update(USM)
-        .set(body)
-        .where("name = :name", { name: usm_name })
-        .execute();
-
+        try {
+            let query = await usmRepository.createQueryBuilder()
+                .update(USM)
+                .set(body)
+                .where("name = :name", { name: usm_name })
+                .execute();
+        } catch (error) {
+            return response.status(403).json({
+                error: "USM is already registered"
+            })
+        }
+        
         return response.status(200).json(body)
     }
 
@@ -92,12 +98,19 @@ class USMController{
                 error: "USM not found"
             })
         }
-
-        usmRepository.createQueryBuilder()
-        .delete()
-        .from(USM)
-        .where("name = :name", { name: usm_name })
-        .execute();
+        
+        try {
+            let query = await usmRepository.createQueryBuilder()
+                .delete()
+                .from(USM)
+                .where("name = :name", { name: usm_name })
+                .execute();
+        } catch (error) {
+            return response.status(403).json({
+                error: error
+            })
+        }
+        
 
         return response.status(200).json("USM Deleted")
     }

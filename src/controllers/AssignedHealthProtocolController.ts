@@ -173,14 +173,21 @@ class AssignedHealthProtocolController {
             })
         }
 
-        assignedHealthProtocolRepository.createQueryBuilder()
-        .delete()
-        .from(AssignedHealthProtocol)
-        .where("healthprotocol_description = :healthprotocol_description and disease_name = :disease_name", {
-            healthprotocol_description: healthprotocol_description, 
-            disease_name: disease_name
-        })
-        .execute()
+        try {
+            let query = await assignedHealthProtocolRepository.createQueryBuilder()
+                .delete()
+                .from(AssignedHealthProtocol)
+                .where("healthprotocol_description = :healthprotocol_description and disease_name = :disease_name", {
+                    healthprotocol_description: healthprotocol_description, 
+                    disease_name: disease_name
+                })
+                .execute()
+        } catch (error) {
+            return response.status(403).json({
+                error: error.message
+            })
+        }
+        
 
         return response.status(200).json("Association deleted!")
     }

@@ -166,12 +166,18 @@ class SymptomOccurrenceController {
             })
         }
 
-        symptomOccurrenceRepository.createQueryBuilder()
-        .update(SymptomOccurrence)
-        .set(body)
-        .where("disease_occurrence_id = :disease_occurrence_id and symptom_name = :symptom_name", 
-            {symptom_name: symptom_name, disease_occurrence_id: disease_occurrence_id})
-        .execute()
+        try {
+            let query = await symptomOccurrenceRepository.createQueryBuilder()
+                .update(SymptomOccurrence)
+                .set(body)
+                .where("disease_occurrence_id = :disease_occurrence_id and symptom_name = :symptom_name", 
+                    {symptom_name: symptom_name, disease_occurrence_id: disease_occurrence_id})
+                .execute()
+        } catch (error) {
+            return response.status(403).json({
+                error: "Symptom already registered for this disease occurrence"
+            })
+        }
 
         return response.status(200).json(body)
     }
@@ -215,12 +221,19 @@ class SymptomOccurrenceController {
             })
         }
 
-        symptomOccurrenceRepository.createQueryBuilder()
-        .delete()
-        .from(SymptomOccurrence)
-        .where("disease_occurrence_id = :disease_occurrence_id and symptom_name = :symptom_name", 
-            {symptom_name: symptom_name, disease_occurrence_id: disease_occurrence_id})
-        .execute()
+        try {
+            let query = await symptomOccurrenceRepository.createQueryBuilder()
+                .delete()
+                .from(SymptomOccurrence)
+                .where("disease_occurrence_id = :disease_occurrence_id and symptom_name = :symptom_name", 
+                    {symptom_name: symptom_name, disease_occurrence_id: disease_occurrence_id})
+                .execute()
+        } catch (error) {
+            return response.status(403).json({
+                error: error.message
+            })
+        }
+        
 
         return response.status(200).json("Symptom occurrence deleted")
     }

@@ -67,12 +67,18 @@ class HealthProtocolController {
                 error: "Health Protocol not found"
             })
         }
-
-        healthProtocolRepository.createQueryBuilder()
-        .update(HealthProtocol)
-        .set(body)
-        .where("description = :description", { description: description })
-        .execute();
+        try {
+            let query = await healthProtocolRepository.createQueryBuilder()
+                .update(HealthProtocol)
+                .set(body)
+                .where("description = :description", { description: description })
+                .execute();
+        } catch (error) {
+            return response.status(403).json({
+                error: "Health Protocol already registered"
+            })
+        }
+        
 
         return response.status(200).json(body)
     }
@@ -92,11 +98,17 @@ class HealthProtocolController {
             })
         }
 
-        healthProtocolRepository.createQueryBuilder()
-        .delete()
-        .from(HealthProtocol)
-        .where("description = :description", { description: description })
-        .execute();
+        try {
+            let query = await healthProtocolRepository.createQueryBuilder()
+                .delete()
+                .from(HealthProtocol)
+                .where("description = :description", { description: description })
+                .execute();
+        } catch (error) {
+            return response.status(403).json({
+                error: error.message
+            })
+        }
 
         return response.status(200).json("Health Protocol Deleted")
     }

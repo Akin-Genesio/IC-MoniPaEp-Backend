@@ -113,12 +113,19 @@ class PatientMovementHistoryController {
             })
         }
 
-        patientMovementRepository.createQueryBuilder()
-        .update(PatientMovementHistory)
-        .set(body)
-        .where("disease_occurrence_id = :disease_occurrence_id and description = :description", 
-            {disease_occurrence_id: disease_occurrence_id, description: description})
-        .execute()
+        try {
+            let query = await patientMovementRepository.createQueryBuilder()
+                .update(PatientMovementHistory)
+                .set(body)
+                .where("disease_occurrence_id = :disease_occurrence_id and description = :description", 
+                    {disease_occurrence_id: disease_occurrence_id, description: description})
+                .execute()
+        } catch (error) {
+            return response.status(403).json({
+                error: error.message
+            })
+        }
+        
 
         return response.status(200).json(body)
 
@@ -151,12 +158,19 @@ class PatientMovementHistoryController {
             })
         }
 
-        patientMovementRepository.createQueryBuilder()
-        .delete()
-        .from(PatientMovementHistory)
-        .where("disease_occurrence_id = :disease_occurrence_id and description = :description", 
-            {disease_occurrence_id: disease_occurrence_id, description: description})
-        .execute()
+        try {
+            let query = await patientMovementRepository.createQueryBuilder()
+                .delete()
+                .from(PatientMovementHistory)
+                .where("disease_occurrence_id = :disease_occurrence_id and description = :description", 
+                    {disease_occurrence_id: disease_occurrence_id, description: description})
+                .execute()
+        } catch (error) {
+            return response.status(403).json({
+                error: error.message
+            })
+        }
+        
 
         return response.status(200).json("Movement history for this disease occurrence deleted!")
     }

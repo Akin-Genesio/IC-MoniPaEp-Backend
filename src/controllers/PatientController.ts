@@ -26,14 +26,13 @@ class PatientController{
         return response.status(201).json(patient)
     }
 
-    async list(request: Request, response: Response){
+    async list(request, response: Response){
         const patientsRepository = getCustomRepository(PatientsRepository)
-
         const patientsList = await patientsRepository.find()
+        const payload = request.tokenPayload
+        //console.log(patientsList)
 
-        console.log(patientsList)
-
-        return response.json(patientsList)
+        return response.json({patientsList, payload})
     }
 
     async getOne(request: Request, response: Response){

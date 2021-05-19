@@ -79,12 +79,18 @@ class VaccineController{
                 error: "Vaccine not found"
             })
         }
-
-        vaccineRepository.createQueryBuilder()
-        .update(Vaccine)
-        .set(body)
-        .where("id = :id", { id: vaccine_id })
-        .execute();
+        try {
+            let query = await vaccineRepository.createQueryBuilder()
+                .update(Vaccine)
+                .set(body)
+                .where("id = :id", { id: vaccine_id })
+                .execute();
+        } catch (error) {
+            return response.status(403).json({
+                error: error.message
+            })
+        }
+        
 
         return response.status(200).json(body)
     }
@@ -104,11 +110,17 @@ class VaccineController{
             })
         }
 
-        vaccineRepository.createQueryBuilder()
-        .delete()
-        .from(Vaccine)
-        .where("id = :id", { id: vaccine_id })
-        .execute();
+        try {
+            let query = await vaccineRepository.createQueryBuilder()
+            .delete()
+            .from(Vaccine)
+            .where("id = :id", { id: vaccine_id })
+            .execute();
+        } catch (error) {
+            return response.status(403).json({
+                error: error.message
+            })
+        }
 
         return response.status(200).json("Vaccine Deleted")
     }

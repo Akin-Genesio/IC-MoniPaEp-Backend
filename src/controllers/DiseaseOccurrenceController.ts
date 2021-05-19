@@ -148,11 +148,18 @@ class DiseaseOccurrenceController {
             })
         }
 
-        diseaseOccurrenceRepository.createQueryBuilder()
-        .update(DiseaseOccurrence)
-        .set(body)
-        .where("id = :id", {id: id})
-        .execute()
+        try {
+            let query = await diseaseOccurrenceRepository.createQueryBuilder()
+                .update(DiseaseOccurrence)
+                .set(body)
+                .where("id = :id", {id: id})
+                .execute()
+        } catch (error) {
+            return response.status(404).json({
+                error: error.message
+            })
+        }
+        
 
         return response.status(200).json(body)
     }
@@ -172,11 +179,18 @@ class DiseaseOccurrenceController {
             })
         }
 
-        diseaseOccurrenceRepository.createQueryBuilder()
-        .delete()
-        .from(DiseaseOccurrence)
-        .where("id = :id", {id: id})
-        .execute()
+        try {
+            let query = await diseaseOccurrenceRepository.createQueryBuilder()
+                .delete()
+                .from(DiseaseOccurrence)
+                .where("id = :id", {id: id})
+                .execute()
+        } catch (error) {
+            return response.status(404).json({
+                error: error.message
+            })
+        }
+        
 
         return response.status(200).json("Disease Occurrence deleted!")
 

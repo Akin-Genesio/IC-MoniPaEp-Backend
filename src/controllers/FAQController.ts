@@ -65,11 +65,18 @@ class FAQController{
             })
         }
 
-        faqRepository.createQueryBuilder()
-        .update(FAQ)
-        .set(body)
-        .where("question = :question", {question: question})
-        .execute()
+        try {
+            let query = await faqRepository.createQueryBuilder()
+                .update(FAQ)
+                .set(body)
+                .where("question = :question", {question: question})
+                .execute()
+        } catch (error) {
+            return response.status(403).json({
+                error: "Question already registered"
+            })
+        }
+        
 
         return response.status(200).json(body)
     }
@@ -88,12 +95,19 @@ class FAQController{
                 error: "Question not found"
             })
         }
-
-        faqRepository.createQueryBuilder()
-        .delete()
-        .from(FAQ)
-        .where("question = :question", {question: question})
-        .execute()
+        
+        try {
+            let query = await faqRepository.createQueryBuilder()
+                .delete()
+                .from(FAQ)
+                .where("question = :question", {question: question})
+                .execute()
+        } catch (error) {
+            return response.status(403).json({
+                error: error
+            })
+        }
+        
 
         return response.status(200).json("Question has been deleted")
     }

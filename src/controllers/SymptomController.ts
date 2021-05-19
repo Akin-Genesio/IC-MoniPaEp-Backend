@@ -70,11 +70,18 @@ class SymptomController {
             })
         }
 
-        symptomRepository.createQueryBuilder()
-        .update(Symptom)
-        .set(body)
-        .where("symptom = :symptom_name", {symptom_name: symptom_name})
-        .execute()
+        try {
+            let query = await symptomRepository.createQueryBuilder()
+                .update(Symptom)
+                .set(body)
+                .where("symptom = :symptom_name", {symptom_name: symptom_name})
+                .execute()
+        } catch (error) {
+            return response.status(403).json({
+                error: "Symptom already registered"
+            })
+        }
+        
 
         return response.status(200).json(body)
     }
@@ -93,11 +100,18 @@ class SymptomController {
             })
         }
 
-        symptomRepository.createQueryBuilder()
-        .delete()
-        .from(Symptom)
-        .where("symptom = :symptom_name", {symptom_name: symptom_name})
-        .execute()
+        try {
+            let query = await symptomRepository.createQueryBuilder()
+                .delete()
+                .from(Symptom)
+                .where("symptom = :symptom_name", {symptom_name: symptom_name})
+                .execute()
+        } catch (error) {
+            return response.status(403).json({
+                error: error.message
+            })
+        }
+        
 
         return response.status(200).json("Symptom deleted")
     }

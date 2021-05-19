@@ -70,12 +70,18 @@ class DiseaseController{
             })
         }
 
-        diseaseRepository.createQueryBuilder()
-        .update(Disease)
-        .set(body)
-        .where("name = :name", { name: disease_name })
-        .execute();
-
+        try {
+            let query = await diseaseRepository.createQueryBuilder()
+                .update(Disease)
+                .set(body)
+                .where("name = :name", { name: disease_name })
+                .execute();
+        } catch (error) {
+            return response.status(403).json({
+                error: "Disease name is already registered"
+            })
+        }
+        
         return response.status(200).json(body)
     }
 
@@ -94,13 +100,19 @@ class DiseaseController{
                 error: "Disease not found"
             })
         }
-
-        diseaseRepository.createQueryBuilder()
-        .delete()
-        .from(Disease)
-        .where("name = :name", { name: disease_name })
-        .execute();
-
+        
+        try {
+            let query = await diseaseRepository.createQueryBuilder()
+                .delete()
+                .from(Disease)
+                .where("name = :name", { name: disease_name })
+                .execute();
+        } catch (error) {
+            return response.status(403).json({
+                error: error
+            })
+        }
+        
         return response.status(200).json("Disease Deleted")
     }
 }
