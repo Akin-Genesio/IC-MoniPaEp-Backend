@@ -101,7 +101,16 @@ export const systemUserMiddleware = async (request, response: Response, next) =>
     const type = request.tokenPayload.type
 
     if (type === "systemUser") {
-        return next()
+        const systemUserRepository = getCustomRepository(SystemUserRepository)
+        const isValidId = await systemUserRepository.findOne({
+            id: id
+        })
+        if(isValidId) {
+            return next()
+        }
+        return response.status(401).json({
+            error: "Not a system user"
+        })
     } else {
         return response.status(401).json({
             error: "Not authorized"

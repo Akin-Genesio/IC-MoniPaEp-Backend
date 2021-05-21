@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryColumn } from "typeorm";
 import {v4 as uuid} from 'uuid'
+import bcrypt from 'bcrypt'
 
 @Entity("patients")
 class Patient{
@@ -9,8 +10,11 @@ class Patient{
     @Column()
     name: string;
 
-    @Column()
+    @Column({select: false})
     password: string;
+
+    @Column()
+    CPF: string;
 
     @Column()
     email: string;
@@ -40,6 +44,13 @@ class Patient{
         if(!this.id){
             this.id = uuid();
         }
+    }
+
+    @BeforeInsert()
+    @BeforeUpdate()
+    async hashPassword(): Promise<void> {
+        const hash = await bcrypt.hash(this.password, 10)
+        this.password = hash
     }
 }
 

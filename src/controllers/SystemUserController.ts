@@ -25,31 +25,39 @@ class SystemUserController {
 
         body.createdAt = new Date()
 
-        const user = systemUserRepository.create(body)
-
-        const userSaved: any = await systemUserRepository.save(user)
-
-        userSaved.password = undefined
-
-        const permissions = permissionRepository.create({
-            userId: userSaved.id,
-            localAdm: false,
-            generalAdm: false
-        })
-
-        const permissionsSaved = await permissionRepository.save(permissions)
-
-        const token = jwt.sign({
-            id: userSaved.id,
-            type: 'systemUser'
-        })
-
-        return response.status(201).json({ userSaved, token, permissionsSaved })
+        try {
+            const user = systemUserRepository.create(body)
+            const userSaved: any = await systemUserRepository.save(user)
+            const permissions = permissionRepository.create({
+                userId: userSaved.id,
+                localAdm: false,
+                generalAdm: false
+            })
+            const permissionsSaved = await permissionRepository.save(permissions)
+            userSaved.password = undefined
+            const token = jwt.sign({
+                id: userSaved.id,
+                type: 'systemUser'
+            })
+            return response.status(201).json({ userSaved, token, permissionsSaved })
+        } catch (error) {
+            return response.status(400).json({
+                error: error.message
+            })
+        }
 
     }
 
     async login(request: Request, response: Response) {
-        const [hashType, hash] = request.headers.authorization.split(' ')
+        let hash
+        try {
+            [, hash] = request.headers.authorization.split(' ')
+        } catch (error) {
+            return response.status(401).json({
+                error: "Credentials required"
+            })
+        }
+
         const [email, password] = Buffer.from(hash, 'base64').toString().split(':')
         
         const systemUserRepository = getCustomRepository(SystemUserRepository)
@@ -90,6 +98,23 @@ class SystemUserController {
         return response.status(200).json(users)
     }
 
+    async getOne(request: Request, response: Response) {
+        const {user_id} = request.params
+        
+        const systemUserRepository = getCustomRepository(SystemUserRepository)
+        const user = await systemUserRepository.findOne({
+            id: user_id
+        })
+
+        if(!user) {
+            return response.status(401).json({
+                error: "User invalid"
+            })
+        }
+
+        return response.status(200).json(user)
+    }
+
     async alterOne(request: Request, response: Response) {
         const body = request.body
         const {user_id} = request.params
@@ -104,6 +129,11 @@ class SystemUserController {
                 error: "User invalid"
             })
         }
+        
+        if(body.password){
+            const hash = await bcrypt.hash(body.password, 10)
+            body.password = hash
+        }
 
         try {
             let query = await systemUserRepository.createQueryBuilder()
@@ -113,7 +143,7 @@ class SystemUserController {
                 .execute()
         } catch (error) {
             return response.status(403).json({
-                error: error.message
+                error: "This email or CPF has already been registered"
             })
         }
 

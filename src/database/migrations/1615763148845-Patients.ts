@@ -15,14 +15,24 @@ export class Patients1615763148845 implements MigrationInterface {
                    {
                        name: "name",
                        type: "varchar",
+                       isNullable: false,
                    },
                    {
                        name: "password",
-                       type: "varchar"
+                       type: "varchar",
+                       isNullable: false
+                   },
+                   {
+                       name: "CPF",
+                       type: "varchar",
+                       isUnique: true,
+                       isNullable: false
                    },
                    {
                        name: "email",
-                       type: "varchar"
+                       type: "varchar",
+                       isUnique: true,
+                       isNullable: false
                    },
                    {
                        name: "lastGPSLocation",

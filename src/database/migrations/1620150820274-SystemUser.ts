@@ -20,12 +20,14 @@ export class SystemUser1620150820274 implements MigrationInterface {
                     {
                         name: "CPF",
                         type: "varchar",
-                        isNullable: false
+                        isNullable: false,
+                        isUnique: true
                     },
                     {
                         name: "email",
                         type: "varchar",
-                        isNullable: false
+                        isNullable: false,
+                        isUnique: true
                     },
                     {
                         name: "password",
