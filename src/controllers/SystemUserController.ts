@@ -50,6 +50,7 @@ class SystemUserController {
 
     async login(request: Request, response: Response) {
         let hash
+        console.log(request.headers)
         try {
             [, hash] = request.headers.authorization.split(' ')
         } catch (error) {
@@ -63,7 +64,7 @@ class SystemUserController {
         const systemUserRepository = getCustomRepository(SystemUserRepository)
         const userExists: any = await systemUserRepository.findOne({
             where: { email: email }, 
-            select: ['id', 'email', 'password']
+            select: ['id', 'email', 'password', 'name', 'department']
         })
 
         if (!userExists) {
@@ -80,9 +81,17 @@ class SystemUserController {
                 type: 'systemUser'
             })
             
-            const userId = userExists.id
+            userExists.CPF = undefined
+            userExists.createdAt = undefined
 
-            return response.status(200).json({user: userId, token})
+            return response.status(200).json({
+                user: {
+                  name: userExists.name,
+                  email: userExists.email,
+                  department: userExists.department,
+                },
+                token
+            })
 
         } else {
             return response.status(400).json({
@@ -112,6 +121,24 @@ class SystemUserController {
             })
         }
 
+        return response.status(200).json(user)
+    }
+
+    async getOneWithToken(request, response: Response) {
+        const id = request.tokenPayload.id
+        
+        const systemUserRepository = getCustomRepository(SystemUserRepository)
+        const user = await systemUserRepository.findOne({
+            id: id
+        })
+
+        if(!user) {
+            return response.status(401).json({
+                error: "User invalid"
+            })
+        }
+        user.CPF = undefined
+        user.createdAt = undefined
         return response.status(200).json(user)
     }
 

@@ -39,6 +39,7 @@ router.post("/appointments", appointmentController.create)//funcionarios USM
 
 router.post("/systemuser/signup", systemUserController.create) //adm e adm local
 router.get("/systemuser/login", systemUserController.login)//geral
+router.get("/systemuser/userdata", jwt.authMiddleware, jwt.systemUserMiddleware, systemUserController.getOneWithToken)//funcionario autenticado*
 router.get("/systemuser", jwt.authMiddleware, jwt.localAdminMiddleware, systemUserController.list)//adm e adm local
 router.get("/systemuser/:user_id", jwt.authMiddleware, jwt.systemUserMiddleware, systemUserController.getOne)//funcionario autenticado*
 router.put("/systemuser/:user_id", jwt.authMiddleware, jwt.systemUserMiddleware, systemUserController.alterOne)//funcionario autenticado*
