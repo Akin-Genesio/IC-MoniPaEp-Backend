@@ -51,12 +51,20 @@ export class Patients1615763148845 implements MigrationInterface {
                        type: "varchar"
                    },
                    {
+                        name: "neighborhood",
+                        type: "varchar"
+                   },
+                   {
+                       name: "houseNumber",
+                       type: "number"
+                   },
+                   {
                        name: "hasHealthPlan",
                        type: "boolean"
                    },
                    {
-                       name: "age",
-                       type: "number"
+                       name: "dateOfBirth",
+                       type: "date"
                    },
                    {
                        name: "status",

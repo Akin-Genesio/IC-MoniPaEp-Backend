@@ -32,10 +32,16 @@ class Patient{
     homeAddress: string;
 
     @Column()
+    neighborhood: string;
+
+    @Column()
     hasHealthPlan: boolean;
 
     @Column()
-    age: number;
+    houseNumber: number;
+
+    @Column()
+    dateOfBirth: Date;
 
     @Column()
     status: string;
