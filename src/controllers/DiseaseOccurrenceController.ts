@@ -2,201 +2,214 @@ import { Request, Response } from "express";
 import { getCustomRepository } from "typeorm";
 import { DiseaseOccurrence } from "../models";
 import { DiseaseOccurrenceRepository, DiseaseRepository, PatientsRepository } from "../repositories";
-
 class DiseaseOccurrenceController {
-    async create(request: Request, response: Response) {
-        const body = request.body
+  async create(request: Request, response: Response) {
+    const body = request.body
 
-        const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
-        const patientsRepository = getCustomRepository(PatientsRepository)
-        const diseasesRepository = getCustomRepository(DiseaseRepository)
+    const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
+    const patientsRepository = getCustomRepository(PatientsRepository)
+    const diseasesRepository = getCustomRepository(DiseaseRepository)
 
-        const patientExists = await patientsRepository.findOne({
-            id: body.patient_id
-        })
+    const patientExists = await patientsRepository.findOne({
+      id: body.patient_id
+    })
 
-        if(!patientExists) {
-            return response.status(404).json({
-                error: "Patient id is not valid!"
-            })
-        }
-
-        const diseaseExists = await diseasesRepository.findOne({
-            name: body.disease_name
-        })
-
-        if(!diseaseExists) {
-            return response.status(404).json({
-                error: "Disease name is not valid!"
-            })
-        }
-
-        const diseaseOccurrence =  diseaseOccurrenceRepository.create(body)
-
-        await diseaseOccurrenceRepository.save(diseaseOccurrence)
-
-        return response.status(201).json(diseaseOccurrence)
-
+    if(!patientExists) {
+      return response.status(404).json({
+        error: "Patient id is not valid!"
+      })
     }
 
-    async list (request: Request, response: Response) {
-        const {patient_id} = request.query
-        const {disease_name} = request.query
-        
-        const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
-        if(!patient_id && !disease_name){
-            const OccurrencesList = await diseaseOccurrenceRepository.find()
-            return response.status(200).json(OccurrencesList)
-        }
-        else if(!patient_id && disease_name){
-            const diseaseRepository = getCustomRepository(DiseaseRepository)
+    const diseaseExists = await diseasesRepository.findOne({
+      name: body.disease_name
+    })
 
-            const IsValidDisease = await diseaseRepository.findOne({
-                name: String(disease_name)
-            })
+    if(!diseaseExists) {
+      return response.status(404).json({
+        error: "Disease name is not valid!"
+      })
+    }
 
-            if (!IsValidDisease){
-                return response.status(404).json({
-                    error: "Disease name is not valid"
-                })
-            }
-            const OccurrencesList = await diseaseOccurrenceRepository.find({
-                disease_name: String(disease_name)
-            })
-            return response.status(200).json(OccurrencesList)
-        }
-        else if(patient_id && !disease_name){
-            const patientRepository = getCustomRepository(PatientsRepository)
+    try {
+      const diseaseOccurrence =  diseaseOccurrenceRepository.create(body)
+      await diseaseOccurrenceRepository.save(diseaseOccurrence)
 
-            const IsValidPatient = await patientRepository.findOne({
-                id: String(patient_id)
-            })
+      return response.status(201).json(diseaseOccurrence)
+    } catch (error) {
+      return response.status(403).json({
+        error: error.message
+      })
+    }
+  }
+
+  async list (request: Request, response: Response) {
+    const {patient_id} = request.query
+    const {disease_name} = request.query
     
-            if(!IsValidPatient){
-                return response.status(404).json({
-                    error: "Patient id is not valid"
-                })
-            }
-            const OccurrencesList = await diseaseOccurrenceRepository.find({
-                patient_id: String(patient_id)
-            })
-            return response.status(200).json(OccurrencesList)
-        }
-        else {
-            const patientRepository = getCustomRepository(PatientsRepository)
-            const diseaseRepository = getCustomRepository(DiseaseRepository)
+    const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
+    if(!patient_id && !disease_name){
+      const OccurrencesList = await diseaseOccurrenceRepository.find()
+      return response.status(200).json(OccurrencesList)
+    }
+    else if(!patient_id && disease_name){
+      const diseaseRepository = getCustomRepository(DiseaseRepository)
 
-            const IsValidPatient = await patientRepository.findOne({
-                id: String(patient_id)
-            })
+      const IsValidDisease = await diseaseRepository.findOne({
+        name: String(disease_name)
+      })
+
+      if (!IsValidDisease){
+        return response.status(404).json({
+          error: "Disease name is not valid"
+        })
+      }
+
+      const OccurrencesList = await diseaseOccurrenceRepository.find({
+        disease_name: String(disease_name)
+      })
+
+      return response.status(200).json(OccurrencesList)
+    }
+    else if(patient_id && !disease_name){
+      const patientRepository = getCustomRepository(PatientsRepository)
+
+      const IsValidPatient = await patientRepository.findOne({
+        id: String(patient_id)
+      })
+
+      if(!IsValidPatient){
+        return response.status(404).json({
+          error: "Patient id is not valid"
+        })
+      }
+
+      const OccurrencesList = await diseaseOccurrenceRepository.find({
+        patient_id: String(patient_id)
+      })
+
+      return response.status(200).json(OccurrencesList)
+    }
+    else {
+      const patientRepository = getCustomRepository(PatientsRepository)
+      const diseaseRepository = getCustomRepository(DiseaseRepository)
+
+      const IsValidPatient = await patientRepository.findOne({
+        id: String(patient_id)
+      })
+
+      if(!IsValidPatient){
+        return response.status(404).json({
+          error: "Patient id is not valid"
+        })
+      }
+
+      const IsValidDisease = await diseaseRepository.findOne({
+        name: String(disease_name)
+      })
+
+      if (!IsValidDisease){
+        return response.status(404).json({
+          error: "Disease name is not valid"
+        })
+      }
+
+      const OccurrencesList = await diseaseOccurrenceRepository.find({
+        patient_id: String(patient_id),
+        disease_name: String(disease_name)
+      })
+
+      return response.status(200).json(OccurrencesList)
+    }
+  }
+
+  async getOne(request: Request, response: Response) {
+    const {id} = request.params
+    const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
     
-            if(!IsValidPatient){
-                return response.status(404).json({
-                    error: "Patient id is not valid"
-                })
-            }
+    const OccurrenceItem = await diseaseOccurrenceRepository.findOne({
+      id: id
+    })
 
-            const IsValidDisease = await diseaseRepository.findOne({
-                name: String(disease_name)
-            })
-
-            if (!IsValidDisease){
-                return response.status(404).json({
-                    error: "Disease name is not valid"
-                })
-            }
-            const OccurrencesList = await diseaseOccurrenceRepository.find({
-                patient_id: String(patient_id),
-                disease_name: String(disease_name)
-            })
-            return response.status(200).json(OccurrencesList)
-        }
-        
+    if(!OccurrenceItem){
+      return response.status(404).json({
+        error: "Disease occurrence not found"
+      })
     }
 
-    async getOne(request: Request, response: Response) {
-        const {id} = request.params
-        const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
-        
-        const OccurrenceItem = await diseaseOccurrenceRepository.findOne({
-            id: id
-        })
+    return response.status(200).json(OccurrenceItem)
+  }
 
-        if(!OccurrenceItem){
-            return response.status(404).json({
-                error: "Disease occurrence not found"
-            })
-        }
+  async alterOne(request: Request, response: Response) {
+    const body = request.body
+    const { id } = request.params
 
-        return response.status(200).json(OccurrenceItem)
+    const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
+    const diseaseRepository = getCustomRepository(DiseaseRepository)
 
+    const diseaseOccurrence = await diseaseOccurrenceRepository.findOne({
+      id: id
+    })
+
+    if(!diseaseOccurrence){
+      return response.status(404).json({
+        error: "Disease occurrence not found"
+      })
     }
 
-    async alterOne(request: Request, response: Response) {
-        const body = request.body
-        const {id} = request.params
+    const diseaseName = await diseaseRepository.findOne({
+      name: body.disease_name
+    })
 
-        const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
-
-        const diseaseOccurrence = await diseaseOccurrenceRepository.findOne({
-            id: id
-        })
-
-        if(!diseaseOccurrence){
-            return response.status(404).json({
-                error: "Disease occurrence not found"
-            })
-        }
-
-        try {
-            let query = await diseaseOccurrenceRepository.createQueryBuilder()
-                .update(DiseaseOccurrence)
-                .set(body)
-                .where("id = :id", {id: id})
-                .execute()
-        } catch (error) {
-            return response.status(404).json({
-                error: error.message
-            })
-        }
-        
-
-        return response.status(200).json(body)
+    if(!diseaseName){
+      return response.status(404).json({
+        error: "Disease name not found"
+      })
     }
 
-    async deleteOne(request: Request, response: Response) {
-        const {id} = request.params
-        
-        const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
+    try {
+      await diseaseOccurrenceRepository.createQueryBuilder()
+        .update(DiseaseOccurrence)
+        .set(body)
+        .where("id = :id", {id: id})
+        .execute()
+      return response.status(200).json(body)
+    } catch (error) {
+      return response.status(404).json({
+        error: error.message
+      })
+    }
+  }
 
-        const diseaseOccurrence = await diseaseOccurrenceRepository.findOne({
-            id: id
-        })
+  async deleteOne(request: Request, response: Response) {
+    const {id} = request.params
+    
+    const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
 
-        if(!diseaseOccurrence){
-            return response.status(404).json({
-                error: "Disease occurrence not found"
-            })
-        }
+    const diseaseOccurrence = await diseaseOccurrenceRepository.findOne({
+      id: id
+    })
 
-        try {
-            let query = await diseaseOccurrenceRepository.createQueryBuilder()
-                .delete()
-                .from(DiseaseOccurrence)
-                .where("id = :id", {id: id})
-                .execute()
-        } catch (error) {
-            return response.status(404).json({
-                error: error.message
-            })
-        }
-        
-
-        return response.status(200).json("Disease Occurrence deleted!")
-
+    if(!diseaseOccurrence){
+      return response.status(404).json({
+        error: "Disease occurrence not found"
+      })
     }
 
-
+    try {
+      await diseaseOccurrenceRepository.createQueryBuilder()
+        .delete()
+        .from(DiseaseOccurrence)
+        .where("id = :id", {id: id})
+        .execute()
+      return response.status(200).json({
+        message: "Disease Occurrence deleted!"
+      })
+    } catch (error) {
+      return response.status(404).json({
+        error: error.message
+      })
+    }
+  }
 }
 
 export { DiseaseOccurrenceController }

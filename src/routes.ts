@@ -6,6 +6,7 @@ import { DiseaseOccurrenceController } from "./controllers/DiseaseOccurrenceCont
 import { FAQController } from "./controllers/FAQController";
 import { PatientController } from "./controllers/PatientController";
 import { PatientMovementHistoryController } from "./controllers/PatientMovementHistoryController";
+import { PermissionsController } from "./controllers/PermissionsController";
 import { SymptomController } from "./controllers/SymptomController";
 import { SymptomOccurrenceController } from "./controllers/SymptomOccurrenceController";
 import { SystemUserController } from "./controllers/SystemUserController";
@@ -26,32 +27,39 @@ const diseaseOccurrenceController = new DiseaseOccurrenceController()
 const symptomOccurrenceController = new SymptomOccurrenceController()
 const patientMovementHistoryController = new PatientMovementHistoryController()
 const systemUserController = new SystemUserController()
+const permissionsController = new PermissionsController()
 
 //Appointments Routes - TBD
 router.post("/appointments", appointmentController.create)//funcionarios USM
 
 //Permissions Routes - TBD
+
+router.post("/permissions", jwt.authMiddleware, jwt.localAdminMiddleware, permissionsController.create)
+router.get("/permissions", jwt.authMiddleware, jwt.localAdminMiddleware, permissionsController.list)
+router.get("/permissions/:user_id", jwt.authMiddleware, jwt.localAdminMiddleware, permissionsController.getOne)
+router.put("/permissions/:user_id", jwt.authMiddleware, jwt.localAdminMiddleware, permissionsController.alterOne)
+router.delete("/permissions/:user_id", jwt.authMiddleware, jwt.localAdminMiddleware, permissionsController.deleteOne)
+
 //Suggestions FAQ/Symptom - TBD
 
+//SystemUser Routes - Ok
 
-
-//SystemUser Routes - getOne
-
-router.post("/systemuser/signup", systemUserController.create) //adm e adm local
+router.post("/systemuser/signup", systemUserController.create) //geral *login ira verificar se esta autorizado
 router.get("/systemuser/login", systemUserController.login)//geral
-router.get("/systemuser/userdata", jwt.authMiddleware, jwt.systemUserMiddleware, systemUserController.getOneWithToken)//funcionario autenticado*
+router.get("/systemuser/userdata", jwt.authMiddleware, jwt.systemUserMiddleware, systemUserController.getOneWithToken)//funcionario autenticado
 router.get("/systemuser", jwt.authMiddleware, jwt.localAdminMiddleware, systemUserController.list)//adm e adm local
-router.get("/systemuser/:user_id", jwt.authMiddleware, jwt.systemUserMiddleware, systemUserController.getOne)//funcionario autenticado*
+router.get("/systemuser/:user_id", jwt.authMiddleware, jwt.systemUserMiddleware, systemUserController.getOne)//funcionario autenticado
 router.put("/systemuser/:user_id", jwt.authMiddleware, jwt.systemUserMiddleware, systemUserController.alterOne)//funcionario autenticado*
 router.delete("/systemuser/:user_id", jwt.authMiddleware, jwt.localAdminMiddleware, systemUserController.deleteOne)//adm e adm local
 
-//Patient Routes - alterar o post pra gerar o token e criar login
+//Patient Routes - Ok
 router.post("/patients/signup", patientController.create) //geral
 router.get("/patients/login", patientController.login) //geral
 router.get("/patients", jwt.authMiddleware, jwt.systemUserMiddleware, patientController.list) //funcionarios autenticados
-router.get("/patients/:patient_id", jwt.authMiddleware, patientController.getOne) //geral autenticado*
+router.get("/patients/data", jwt.authMiddleware, patientController.getOneWithToken)//usuario autenticado
+router.get("/patients/:patient_id", jwt.authMiddleware, jwt.systemUserMiddleware, patientController.getOne) //funcionario autenticado
 router.put("/patients/:patient_id", jwt.authMiddleware, patientController.alterOne) //geral autenticado*
-router.delete("/patients/:patient_id", jwt.authMiddleware, patientController.deleteOne) //geral autenticado*
+router.delete("/patients/:patient_id", jwt.authMiddleware, jwt.systemUserMiddleware, patientController.deleteOne) //geral autenticado*
 
 //USM Routes - Ok
 router.post("/usm", jwt.authMiddleware, jwt.localAdminMiddleware, usmController.create)//adm e adm local
@@ -116,6 +124,5 @@ router.post("/faq", jwt.authMiddleware, jwt.localAdminMiddleware, faqController.
 router.get("/faq", faqController.list)//geral
 router.put("/faq/:question", jwt.authMiddleware, jwt.localAdminMiddleware, faqController.alterOne)//adm e adm local
 router.delete("/faq/:question", jwt.authMiddleware, jwt.localAdminMiddleware, faqController.deleteOne)//adm e adm local
-
 
 export { router };

@@ -4,114 +4,118 @@ import { HealthProtocol } from "../models";
 import { HealthProtocolRepository } from "../repositories/HealthProtocolRepository";
 
 class HealthProtocolController {
-    async create(request: Request, response: Response) {
-        const body = request.body
+  async create(request: Request, response: Response) {
+    const body = request.body
 
-        const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
-        const IsAlreadyRegistered = await healthProtocolRepository.findOne({
-            description: body.description
-        })
+    const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
+    const IsAlreadyRegistered = await healthProtocolRepository.findOne({
+      description: body.description
+    })
 
-        if (IsAlreadyRegistered) {
-            return response.status(400).json({
-                error: "Health protocol has already been registered!"
-            })
-        }
-
-        const healthProtocol = healthProtocolRepository.create(body)
-        
-        await healthProtocolRepository.save(healthProtocol)
-
-        return response.status(201).json(healthProtocol)
-        
+    if (IsAlreadyRegistered) {
+      return response.status(400).json({
+        error: "Health protocol has already been registered!"
+      })
     }
 
-    async list(request: Request, response: Response){
-        const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
+    try {
+      const healthProtocol = healthProtocolRepository.create(body)
+      await healthProtocolRepository.save(healthProtocol)
 
-        const healthProtocolList = await healthProtocolRepository.find()
+      return response.status(201).json(healthProtocol)
+    } catch (error) {
+      return response.status(403).json({
+        error: error.message
+      })
+    }    
+  }
 
-        return response.json(healthProtocolList)
+  async list(request: Request, response: Response){
+    const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
+
+    const healthProtocolList = await healthProtocolRepository.find()
+
+    return response.json(healthProtocolList)
+  }
+
+  async getOne(request: Request, response: Response){
+    const {description} = request.params
+
+    const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
+
+    const health_protocol = await healthProtocolRepository.findOne({
+      description: description
+    })
+    
+    if(!health_protocol){
+      return response.status(404).json({
+        error: "Health Protocol not found"
+      })
     }
 
-    async getOne(request: Request, response: Response){
-        const {description} = request.params
+    return response.status(302).json(health_protocol)
+  }
 
-        const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
+  async alterOne(request: Request, response: Response){
+    const body = request.body
+    const {description} = request.params
 
-        const health_protocol = await healthProtocolRepository.findOne({
-            description: description
-        })
-        
-        if(!health_protocol){
-            return response.status(404).json({
-                error: "Health Protocol not found"
-            })
-        }
+    const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
 
-        return response.status(302).json(health_protocol)
+    const health_protocol = await healthProtocolRepository.findOne({
+      description: description
+    })
+    
+    if(!health_protocol){
+      return response.status(404).json({
+        error: "Health Protocol not found"
+      })
     }
 
-    async alterOne(request: Request, response: Response){
-        const body = request.body
-        const {description} = request.params
+    try {
+      await healthProtocolRepository.createQueryBuilder()
+        .update(HealthProtocol)
+        .set(body)
+        .where("description = :description", { description: description })
+        .execute();
+      return response.status(200).json(body)
+    } catch (error) {
+      return response.status(403).json({
+        error: "Health Protocol already registered"
+      })
+    }
+  }
 
-        const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
+  async deleteOne(request: Request, response: Response){
+    const {description} = request.params
 
-        const health_protocol = await healthProtocolRepository.findOne({
-            description: description
-        })
-        
-        if(!health_protocol){
-            return response.status(404).json({
-                error: "Health Protocol not found"
-            })
-        }
-        try {
-            let query = await healthProtocolRepository.createQueryBuilder()
-                .update(HealthProtocol)
-                .set(body)
-                .where("description = :description", { description: description })
-                .execute();
-        } catch (error) {
-            return response.status(403).json({
-                error: "Health Protocol already registered"
-            })
-        }
-        
+    const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
 
-        return response.status(200).json(body)
+    const health_protocol = await healthProtocolRepository.findOne({
+      description: description
+    })
+    
+    if(!health_protocol){
+      return response.status(404).json({
+        error: "Health Protocol not found"
+      })
     }
 
-    async deleteOne(request: Request, response: Response){
-        const {description} = request.params
-
-        const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
-
-        const health_protocol = await healthProtocolRepository.findOne({
-            description: description
-        })
-        
-        if(!health_protocol){
-            return response.status(404).json({
-                error: "Health Protocol not found"
-            })
-        }
-
-        try {
-            let query = await healthProtocolRepository.createQueryBuilder()
-                .delete()
-                .from(HealthProtocol)
-                .where("description = :description", { description: description })
-                .execute();
-        } catch (error) {
-            return response.status(403).json({
-                error: error.message
-            })
-        }
-
-        return response.status(200).json("Health Protocol Deleted")
+    try {
+      await healthProtocolRepository.createQueryBuilder()
+        .delete()
+        .from(HealthProtocol)
+        .where("description = :description", { description: description })
+        .execute();
+      return response.status(200).json({
+        message: "Health Protocol deleted"
+      })
+    } catch (error) {
+      return response.status(403).json({
+        error: error.message
+      })
     }
+  }
 }
 
 export { HealthProtocolController };
