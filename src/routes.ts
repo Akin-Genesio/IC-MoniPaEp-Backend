@@ -48,7 +48,8 @@ router.delete("/systemuser/:user_id", jwt.authMiddleware, jwt.localAdminMiddlewa
 //Patient Routes - alterar o post pra gerar o token e criar login
 router.post("/patients/signup", patientController.create) //geral
 router.get("/patients/login", patientController.login) //geral
-router.get("/patients", jwt.authMiddleware, jwt.systemUserMiddleware, patientController.list) //funcionarios autenticados
+router.get("/patients/listAll", jwt.authMiddleware, jwt.systemUserMiddleware, patientController.list) //funcionarios autenticados
+router.get("/patients/list", jwt.authMiddleware, jwt.systemUserMiddleware, patientController.listActiveAccounts) //funcionarios autenticados
 router.get("/patients/:patient_id", jwt.authMiddleware, patientController.getOne) //geral autenticado*
 router.put("/patients/:patient_id", jwt.authMiddleware, patientController.alterOne) //geral autenticado*
 router.delete("/patients/:patient_id", jwt.authMiddleware, patientController.deleteOne) //geral autenticado*

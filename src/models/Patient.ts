@@ -53,6 +53,9 @@ class Patient{
         if(!this.id){
             this.id = uuid();
         }
+        if(!this.activeAccount){
+            this.activeAccount = true;
+        }
     }
 
     @BeforeInsert()

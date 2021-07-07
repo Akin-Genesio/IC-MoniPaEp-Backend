@@ -88,6 +88,15 @@ class PatientController{
         return response.json(patientsList)
     }
 
+    async listActiveAccounts(request: Request, response: Response){
+        const patientsRepository = getCustomRepository(PatientsRepository)
+        const patientsList = await patientsRepository.find(
+            {activeAccount: true}
+        )
+
+        return response.json(patientsList)
+    }
+
     async getOne(request: Request, response: Response){
         const {patient_id} = request.params
 
