@@ -53,7 +53,7 @@ router.get("/patients/list", jwt.authMiddleware, jwt.systemUserMiddleware, patie
 router.get("/patients/:patient_id", jwt.authMiddleware, patientController.getOne) //geral autenticado*
 router.put("/patients/:patient_id", jwt.authMiddleware, patientController.alterOne) //geral autenticado*
 router.delete("/patients/:patient_id", jwt.authMiddleware, patientController.deleteOne) //geral autenticado*
-router.put("/patients/deactivate/:patient_id", jwt.authMiddleware, patientController.deactivateAccount) //geral autenticado*
+router.delete("/patients/deactivate/:patient_id", jwt.authMiddleware, patientController.deactivateAccount) //geral autenticado*
 
 //USM Routes - Ok
 router.post("/usm", jwt.authMiddleware, jwt.localAdminMiddleware, usmController.create)//adm e adm local
