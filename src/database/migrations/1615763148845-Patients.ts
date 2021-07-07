@@ -69,6 +69,11 @@ export class Patients1615763148845 implements MigrationInterface {
                    {
                        name: "status",
                        type: "varchar"
+                   },
+                   {
+                       name: "activeAccount",
+                       type: "boolean",
+                       default: true
                    }
                ]
            }) 
