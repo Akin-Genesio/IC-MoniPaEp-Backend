@@ -46,6 +46,9 @@ class Patient{
     @Column()
     status: string;
 
+    @Column()
+    readonly activeAccount: boolean;
+
     constructor(){
         if(!this.id){
             this.id = uuid();

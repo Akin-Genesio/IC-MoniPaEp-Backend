@@ -171,6 +171,42 @@ class PatientController{
 
         return response.status(200).json("Patient Deleted")
     }
+
+    async deactivateAccount(request: Request, response: Response){
+        const body = request.body
+        const {patient_id} = request.params
+
+        const patientsRepository = getCustomRepository(PatientsRepository)
+
+        const patient = await patientsRepository.findOne({
+            id: patient_id
+        })
+        
+        if(!patient){
+            return response.status(404).json({
+                error: "Patient not found"
+            })
+        }
+
+        if(body.password){
+            const hash = await bcrypt.hash(body.password, 10)
+            body.password = hash
+        }
+
+        try {
+            let query = await patientsRepository.createQueryBuilder()
+                .update(Patient)
+                .set({activeAccount: false})
+                .where("id = :id", { id: patient_id })
+                .execute();
+        } catch (error) {
+            return response.status(403).json({
+                error: error.message
+            })
+        }
+
+        return response.status(200).json("deactivated account")
+    }
 }
 
 export { PatientController };
