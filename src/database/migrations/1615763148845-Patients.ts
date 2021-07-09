@@ -37,6 +37,7 @@ export class Patients1615763148845 implements MigrationInterface {
                    {
                        name: "lastGPSLocation",
                        type: "varchar",
+                       isNullable: true
                    },
                    {
                        name: "allowSMS",
@@ -44,7 +45,8 @@ export class Patients1615763148845 implements MigrationInterface {
                    },
                    {
                        name: "workAddress",
-                       type: "varchar"
+                       type: "varchar",
+                       isNullable: true
                    },
                    {
                        name: "homeAddress",
@@ -68,7 +70,8 @@ export class Patients1615763148845 implements MigrationInterface {
                    },
                    {
                        name: "status",
-                       type: "varchar"
+                       type: "varchar",
+                       isNullable: true
                    },
                    {
                        name: "activeAccount",

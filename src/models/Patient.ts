@@ -20,13 +20,13 @@ class Patient{
     email: string;
 
     @Column()
-    lastGPSLocation: string;
+    lastGPSLocation?: string;
 
     @Column()
     allowSMS: boolean;
 
     @Column()
-    workAddress: string;
+    workAddress?: string;
 
     @Column()
     homeAddress: string;
@@ -44,7 +44,7 @@ class Patient{
     dateOfBirth: Date;
 
     @Column()
-    status: string;
+    status?: string;
 
     @Column()
     readonly activeAccount: boolean;
