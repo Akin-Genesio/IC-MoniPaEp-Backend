@@ -5,6 +5,7 @@ import { PatientsRepository } from "../repositories/PatientsRepository";
 
 import bcrypt from 'bcrypt'
 import * as jwt from "../jwt"
+import { PatientAlreadyExistsError } from "../errors";
 
 class PatientController{
     async create(request: Request, response: Response){
@@ -15,9 +16,7 @@ class PatientController{
         const patientAlreadyExists = await patientsRepository.findOne({ where: [{ CPF: body.CPF }, { email: body.email }] })
 
         if(patientAlreadyExists){
-            return response.status(400).json({
-                error: "Patient already registered with this email or CPF"
-            })
+            throw new PatientAlreadyExistsError()
         }
 
         try {
