@@ -35,6 +35,10 @@ export class Patients1615763148845 implements MigrationInterface {
                        isNullable: false
                    },
                    {
+                        name: "phone",
+                        type: "varchar"
+                   },
+                   {
                        name: "lastGPSLocation",
                        type: "varchar",
                        isNullable: true

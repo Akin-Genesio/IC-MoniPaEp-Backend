@@ -20,6 +20,9 @@ class Patient{
     email: string;
 
     @Column()
+    phone: string;
+
+    @Column()
     lastGPSLocation?: string;
 
     @Column()
