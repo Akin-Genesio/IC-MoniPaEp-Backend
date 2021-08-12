@@ -30,8 +30,8 @@ class FAQSuggestionsController {
       })
     }
   }
-
-   async list(request: Request, response: Response) {
+  
+  async list(request: Request, response: Response) {
     const {question} = request.query
 
     const faqSuggestionsRepository = getCustomRepository(FAQSuggestionsRepository)
