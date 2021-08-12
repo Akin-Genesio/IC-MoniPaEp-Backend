@@ -1,4 +1,4 @@
-# Protótipo do backendo do aplicativo
+# Protótipo do backend do aplicativo MoniPaEP, cujo objetivo é ajudar o Sistema de Vigilância em Saúde (SVS) a lidar com epidemias
 
 Tecnologias utilizadas:
 
