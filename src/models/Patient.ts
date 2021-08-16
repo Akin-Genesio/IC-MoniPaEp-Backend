@@ -44,13 +44,16 @@ class Patient{
     houseNumber: number;
 
     @Column()
-    dateOfBirth: Date;
+    birthdate: Date;
 
     @Column()
     status?: string;
 
     @Column()
     readonly activeAccount: boolean;
+
+    @Column()
+    createdAt: Date;
 
     constructor(){
         if(!this.id){

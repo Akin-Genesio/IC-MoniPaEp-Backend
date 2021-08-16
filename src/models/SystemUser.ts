@@ -25,6 +25,9 @@ class SystemUser {
     @Column()
     createdAt: Date;
 
+    @Column()
+    authorized: boolean;
+
     constructor(){
         if(!this.id){
             this.id = uuid();
