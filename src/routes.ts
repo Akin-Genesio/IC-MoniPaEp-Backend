@@ -13,6 +13,7 @@ import { FAQController } from "./controllers/FAQController";
 import { PatientController } from "./controllers/PatientController";
 import { PatientMovementHistoryController } from "./controllers/PatientMovementHistoryController";
 import { PermissionsController } from "./controllers/PermissionsController";
+import { RefreshTokenController } from "./controllers/RefreshTokenController";
 import { SymptomController } from "./controllers/SymptomController";
 import { SymptomOccurrenceController } from "./controllers/SymptomOccurrenceController";
 import { SystemUserController } from "./controllers/SystemUserController";
@@ -35,9 +36,14 @@ const patientMovementHistoryController = new PatientMovementHistoryController()
 const systemUserController = new SystemUserController()
 const permissionsController = new PermissionsController()
 const faqSuggestionsController = new FAQSuggestionsController()
+const refreshTokenController = new RefreshTokenController()
 
 //Appointments Routes - TBD
 router.post("/appointments", appointmentController.create)//funcionarios USM
+
+//Refresh Token Routes
+
+router.post("/refreshtoken", refreshTokenController.create)
 
 //Permissions Routes
 
@@ -61,11 +67,11 @@ router.delete("/systemuser/:user_id", jwt.authMiddleware, jwt.localAdminMiddlewa
 router.post("/patients/signup", patientController.create) //geral
 //router.get("/patients/login", patientController.login) //geral
 router.post("/patients/login", patientController.loginPost) //geral
-router.get("/patients/listAll", jwt.authMiddleware, jwt.systemUserMiddleware, patientController.list) //funcionarios autenticados
-router.get("/patients/list", jwt.authMiddleware, jwt.systemUserMiddleware, patientController.listActiveAccounts) //funcionarios autenticados
+router.get("/patients/listall", jwt.authMiddleware, jwt.systemUserMiddleware, patientController.list) //funcionarios autenticados
+router.get("/patients/", jwt.authMiddleware, jwt.systemUserMiddleware, patientController.listActiveAccounts) //funcionarios autenticados
 router.get("/patients/:patient_id", jwt.authMiddleware, patientController.getOne) //geral autenticado*
 router.put("/patients/:patient_id", jwt.authMiddleware, patientController.alterOne) //geral autenticado*
-router.delete("/patients/:patient_id", jwt.authMiddleware, patientController.deleteOne) //geral autenticado*
+router.delete("/patients/:patient_id", jwt.authMiddleware, jwt.systemUserMiddleware, patientController.deleteOne) //funcionarios autenticados
 router.delete("/patients/deactivate/:patient_id", jwt.authMiddleware, patientController.deactivateAccount) //geral autenticado*
 
 //USM Routes

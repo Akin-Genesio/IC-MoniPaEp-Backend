@@ -1,11 +1,13 @@
 import { Request, Response } from "express";
 import { getCustomRepository } from 'typeorm';
-import { Patient } from "../models";
-import { PatientsRepository } from "../repositories/PatientsRepository";
-
 import bcrypt from 'bcrypt'
+import dayjs from 'dayjs'
+
 import * as jwt from "../jwt"
+import { Patient, RefreshToken } from "../models";
+import { RefreshTokenRepository, PatientsRepository } from "../repositories";
 import { PatientAlreadyExistsError } from "../errors";
+import { refreshTokenExpiresIn } from "../refreshTokenExpiration";
 
 class PatientController{
   async create(request: Request, response: Response){
@@ -13,22 +15,40 @@ class PatientController{
     
     const patientsRepository = getCustomRepository(PatientsRepository)
 
-    const patientAlreadyExists = await patientsRepository.findOne({ where: [{ CPF: body.CPF }, { email: body.email }] })
+    const patientAlreadyExists = await patientsRepository.findOne({ 
+      where: [
+        { CPF: body.CPF }, 
+        { email: body.email }
+      ] 
+    })
 
     if(patientAlreadyExists){
       throw new PatientAlreadyExistsError()
     }
 
+    body.createdAt = new Date()
+
     try {
-      body.createdAt = new Date()
       const patientBody = patientsRepository.create(body)
       const patient: any = await patientsRepository.save(patientBody)
+      const patientId = patient.id
+      
+      const refreshTokenRepository = getCustomRepository(RefreshTokenRepository)
+
+      const refreshTokenBody = refreshTokenRepository.create({
+        patientId,
+        expiresIn: refreshTokenExpiresIn()
+      })
+
+      const refreshToken = await refreshTokenRepository.save(refreshTokenBody)
+
       const token = jwt.sign({
           id: patient.id,
           type: 'patient'
       })
+
       patient.password = undefined
-      return response.status(201).json({patient, token})
+      return response.status(201).json({ patient, token, refreshToken })
     } catch (error) {
       return response.status(403).json({
         error: error.message
@@ -36,53 +56,75 @@ class PatientController{
     }
   }
 
-  async login(request: Request, response: Response){
-    let hash
-    try {
-      [, hash] = request.headers.authorization.split(' ')
-    } catch (error) {
-      return response.status(401).json({
-          error: "Credentials required"
-      })
-    }
+  // async login(request: Request, response: Response){
+  //   let hash
+  //   try {
+  //     [, hash] = request.headers.authorization.split(' ')
+  //   } catch (error) {
+  //     return response.status(401).json({
+  //         error: "Credentials required"
+  //     })
+  //   }
     
-    const [email, password] = Buffer.from(hash, 'base64').toString().split(':')
+  //   const [email, password] = Buffer.from(hash, 'base64').toString().split(':')
 
-    const patientsRepository = getCustomRepository(PatientsRepository)
-    const patientExists: any = await patientsRepository.findOne({
-      where: { email: email }, 
-      select: ['id', 'email', 'password']
-    })
+  //   const patientsRepository = getCustomRepository(PatientsRepository)
+  //   const patientExists: any = await patientsRepository.findOne({
+  //     where: { email: email }, 
+  //     select: ['id', 'email', 'password']
+  //   })
 
-    if (!patientExists) {
-      return response.status(401).json({
-        error: "Patient does not exist"
-      })
-    }
+  //   if (!patientExists) {
+  //     return response.status(401).json({
+  //       error: "Patient does not exist"
+  //     })
+  //   }
 
-    const validPassword = await bcrypt.compare(password, patientExists.password)
+  //   const validPassword = await bcrypt.compare(password, patientExists.password)
 
-    if(validPassword) {
-      const token = jwt.sign({
-        id: patientExists.id,
-        type: 'patient'
-      })
-      const patientId = patientExists.id
+  //   if(validPassword) {
+  //     const patientId = patientExists.id
+  //     const token = jwt.sign({
+  //       id: patientId,
+  //       type: 'patient'
+  //     })
 
-      return response.status(200).json({patientId, token})
-    } else {
-      return response.status(400).json({
-        error: "Invalid password"
-      })
-    }
-  }
+  //     const refreshTokenRepository = getCustomRepository(RefreshTokenRepository)
+
+  //     const refreshTokenExists = await refreshTokenRepository.find({
+  //       patientId
+  //     })
+      
+  //     if(refreshTokenExists) {
+  //       await refreshTokenRepository.createQueryBuilder()
+  //       .delete()
+  //       .from(RefreshToken)
+  //       .where("patientId = :id", { id: patientId })
+  //       .execute()
+  //     }
+
+  //     const refreshTokenBody = refreshTokenRepository.create({
+  //       patientId,
+  //       expiresIn: dayjs().add(15, 'seconds').unix()
+  //     })
+
+  //     const refreshToken = await refreshTokenRepository.save(refreshTokenBody)
+      
+
+  //     return response.status(200).json({ patientId, token, refreshToken })
+  //   } else {
+  //     return response.status(400).json({
+  //       error: "Invalid password"
+  //     })
+  //   }
+  // }
 
   async loginPost(request: Request, response: Response){
     const { email, password } = request.body
 
     const patientsRepository = getCustomRepository(PatientsRepository)
     const patientExists: any = await patientsRepository.findOne({
-      where: { email: email }, 
+      where: { email }, 
       select: ['id', 'email', 'password']
     })
 
@@ -95,13 +137,35 @@ class PatientController{
     const validPassword = await bcrypt.compare(password, patientExists.password)
 
     if(validPassword) {
-      const token = jwt.sign({
-        id: patientExists.id,
-        type: 'patient'
-      })
       const patientId = patientExists.id
 
-      return response.status(200).json({patientId, token})
+      const token = jwt.sign({
+        id: patientId,
+        type: 'patient'
+      })
+
+      const refreshTokenRepository = getCustomRepository(RefreshTokenRepository)
+
+      const refreshTokenExists = await refreshTokenRepository.find({
+        patientId
+      })
+      
+      if(refreshTokenExists) {
+        await refreshTokenRepository.createQueryBuilder()
+        .delete()
+        .from(RefreshToken)
+        .where("patientId = :id", { id: patientId })
+        .execute()
+      }
+
+      const refreshTokenBody = refreshTokenRepository.create({
+        patientId,
+        expiresIn: refreshTokenExpiresIn()
+      })
+
+      const refreshToken = await refreshTokenRepository.save(refreshTokenBody)
+
+      return response.status(200).json({ patientId, token, refreshToken })
     } else {
       return response.status(400).json({
         error: "Invalid password"
