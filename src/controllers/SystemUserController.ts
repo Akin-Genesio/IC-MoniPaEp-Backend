@@ -4,8 +4,9 @@ import { SystemUserRepository } from "../repositories/SystemUserRepository";
 import * as jwt from "../jwt"
 
 import bcrypt from 'bcrypt'
-import { PermissionsRepository } from "../repositories";
-import { SystemUser } from "../models";
+import { PermissionsRepository, RefreshTokenRepository } from "../repositories";
+import { RefreshToken, SystemUser } from "../models";
+import { refreshTokenExpiresIn } from "src/refreshTokenExpiration";
 class SystemUserController {
   async create(request: Request, response: Response) {
     const body = request.body
@@ -27,7 +28,6 @@ class SystemUserController {
     }
 
     body.createdAt = new Date()
-    body.authorized = false
 
     try {
       const user = systemUserRepository.create(body)
@@ -35,18 +35,29 @@ class SystemUserController {
       const permissions = permissionRepository.create({
         userId: userSaved.id,
         localAdm: false,
-        generalAdm: false
+        generalAdm: false,
+        authorized: false
       })
+
       await permissionRepository.save(permissions)
-      userSaved.password = undefined
-      userSaved.authorized = undefined
+
+      /*const refreshTokenRepository = getCustomRepository(RefreshTokenRepository)
+
+      const refreshTokenBody = refreshTokenRepository.create({
+        systemUserId: userSaved.id,
+        expiresIn: refreshTokenExpiresIn()
+      })
+
+      const refreshToken = await refreshTokenRepository.save(refreshTokenBody)
 
       const token = jwt.sign({
         id: userSaved.id,
         type: 'systemUser'
-      })
+      })*/
 
-      return response.status(201).json({ user: userSaved, token })
+      userSaved.password = undefined
+      
+      return response.status(201).json({ user: userSaved })
     } catch (error) {
       return response.status(403).json({
         error: error.message
@@ -58,34 +69,57 @@ class SystemUserController {
     let hash
     
     try {
-        [, hash] = request.headers.authorization.split(' ')
+      [, hash] = request.headers.authorization.split(' ')
     } catch (error) {
-        return response.status(401).json({
-            error: "Credentials required"
-        })
+      return response.status(401).json({
+        error: "Credentials required"
+      })
     }
 
     const [email, password] = Buffer.from(hash, 'base64').toString().split(':')
     
     const systemUserRepository = getCustomRepository(SystemUserRepository)
     const userExists: any = await systemUserRepository.findOne({
-        where: { email: email }, 
-        select: ['id', 'email', 'password', 'name', 'department']
+      where: { email }, 
+      select: ['id', 'email', 'password', 'name', 'department']
     })
 
     if (!userExists) {
-        return response.status(401).json({
-            error: "User does not exist"
-        })
+      return response.status(401).json({
+        error: "User does not exist"
+      })
     }
 
     const validPassword = await bcrypt.compare(password, userExists.password)
 
     if(validPassword) {
+      const systemUserId = userExists.id
+      
       const token = jwt.sign({
-        id: userExists.id,
+        id: systemUserId,
         type: 'systemUser'
       })
+
+      const refreshTokenRepository = getCustomRepository(RefreshTokenRepository)
+
+      const refreshTokenExists = await refreshTokenRepository.findOne({
+        systemUserId
+      })
+      
+      if(refreshTokenExists) {
+        await refreshTokenRepository.createQueryBuilder()
+        .delete()
+        .from(RefreshToken)
+        .where("systemUserId = :id", { id: systemUserId })
+        .execute()
+      }
+
+      const refreshTokenBody = refreshTokenRepository.create({
+        systemUserId,
+        expiresIn: refreshTokenExpiresIn()
+      })
+
+      const refreshToken = await refreshTokenRepository.save(refreshTokenBody)
 
       return response.status(200).json({
         user: {
@@ -93,8 +127,10 @@ class SystemUserController {
           email: userExists.email,
           department: userExists.department,
         },
-        token
+        token,
+        refreshToken,
       })
+
     } else {
       return response.status(400).json({
         error: "Invalid password"

@@ -43,11 +43,6 @@ export class SystemUser1620150820274 implements MigrationInterface {
             name: "createdAt",
             type: "datetime"
           },
-          {
-            name: "authorized",
-            type: "boolean",
-            default: false
-          }
         ]
       })
     )

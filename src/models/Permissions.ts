@@ -10,6 +10,9 @@ class Permissions {
     systemUser: SystemUser
 
     @Column()
+    authorized: boolean
+
+    @Column()
     localAdm: boolean
 
     @Column()
