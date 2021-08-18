@@ -38,25 +38,9 @@ class SystemUserController {
         generalAdm: false,
         authorized: false
       })
-
       await permissionRepository.save(permissions)
-
-      /*const refreshTokenRepository = getCustomRepository(RefreshTokenRepository)
-
-      const refreshTokenBody = refreshTokenRepository.create({
-        systemUserId: userSaved.id,
-        expiresIn: refreshTokenExpiresIn()
-      })
-
-      const refreshToken = await refreshTokenRepository.save(refreshTokenBody)
-
-      const token = jwt.sign({
-        id: userSaved.id,
-        type: 'systemUser'
-      })*/
-
-      userSaved.password = undefined
-      
+    
+      userSaved.password = undefined      
       return response.status(201).json({ user: userSaved })
     } catch (error) {
       return response.status(403).json({
@@ -90,18 +74,34 @@ class SystemUserController {
       })
     }
 
+    const systemUserId = userExists.id
     const validPassword = await bcrypt.compare(password, userExists.password)
 
-    if(validPassword) {
-      const systemUserId = userExists.id
-      
-      const token = jwt.sign({
-        id: systemUserId,
-        type: 'systemUser'
+    if(!validPassword) {
+      return response.status(400).json({
+        error: "Invalid password"
+      })
+    }
+
+    try {
+      const permissionsRepository = getCustomRepository(PermissionsRepository)
+      const userPermissions = await permissionsRepository.findOne({
+        userId: systemUserId
       })
 
-      const refreshTokenRepository = getCustomRepository(RefreshTokenRepository)
+      if(!userPermissions) {
+        return response.status(400).json({
+          error: "User does not have permissions"
+        })
+      }
 
+      if(!userPermissions.authorized) {
+        return response.status(400).json({
+          error: "User not authorized"
+        })
+      }
+      
+      const refreshTokenRepository = getCustomRepository(RefreshTokenRepository)
       const refreshTokenExists = await refreshTokenRepository.findOne({
         systemUserId
       })
@@ -121,6 +121,11 @@ class SystemUserController {
 
       const refreshToken = await refreshTokenRepository.save(refreshTokenBody)
 
+      const token = jwt.sign({
+        id: systemUserId,
+        type: 'systemUser'
+      })
+
       return response.status(200).json({
         user: {
           name: userExists.name,
@@ -131,11 +136,12 @@ class SystemUserController {
         refreshToken,
       })
 
-    } else {
+    } catch (error) {
       return response.status(400).json({
-        error: "Invalid password"
+        error: error.message
       })
     }
+
   }
 
   async list(request: Request, response: Response) {
