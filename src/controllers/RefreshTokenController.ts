@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import * as jwt from "../jwt"
 
 import { RefreshToken } from "../models";
-import { RefreshTokenRepository, SystemUserRepository, PatientsRepository } from "../repositories";
+import { RefreshTokenRepository } from "../repositories";
 import { refreshTokenExpiresIn } from "../refreshTokenExpiration";
 
 class RefreshTokenController {
