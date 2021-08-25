@@ -2,8 +2,8 @@ import { Entity, PrimaryColumn } from "typeorm";
 
 @Entity("healthProtocols")
 class HealthProtocol{
-    @PrimaryColumn()
-    description: string
+  @PrimaryColumn()
+  description: string
 }
 
 export { HealthProtocol };

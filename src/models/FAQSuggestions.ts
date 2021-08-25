@@ -9,4 +9,4 @@ class FAQSuggestions{
   answer: string;
 }
 
-export {FAQSuggestions}
+export { FAQSuggestions }

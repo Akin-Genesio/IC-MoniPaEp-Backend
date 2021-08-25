@@ -4,72 +4,72 @@ import bcrypt from 'bcrypt'
 
 @Entity("patients")
 class Patient{
-    @PrimaryColumn()
-    readonly id: string;
+  @PrimaryColumn()
+  readonly id: string;
 
-    @Column()
-    name: string;
+  @Column()
+  name: string;
 
-    @Column({select: false})
-    password: string;
+  @Column({ select: false })
+  password: string;
 
-    @Column()
-    CPF: string;
+  @Column()
+  CPF: string;
 
-    @Column()
-    email: string;
+  @Column()
+  email: string;
 
-    @Column()
-    phone: string;
+  @Column()
+  phone: string;
 
-    @Column()
-    lastGPSLocation?: string;
+  @Column()
+  lastGPSLocation?: string;
 
-    @Column()
-    allowSMS: boolean;
+  @Column()
+  allowSMS: boolean;
 
-    @Column()
-    workAddress?: string;
+  @Column()
+  workAddress?: string;
 
-    @Column()
-    homeAddress: string;
+  @Column()
+  homeAddress: string;
 
-    @Column()
-    neighborhood: string;
+  @Column()
+  neighborhood: string;
 
-    @Column()
-    hasHealthPlan: boolean;
+  @Column()
+  hasHealthPlan: boolean;
 
-    @Column()
-    houseNumber: number;
+  @Column()
+  houseNumber: number;
 
-    @Column()
-    birthdate: Date;
+  @Column()
+  birthdate: Date;
 
-    @Column()
-    status?: string;
+  @Column()
+  status?: string;
 
-    @Column()
-    readonly activeAccount: boolean;
+  @Column()
+  readonly activeAccount: boolean;
 
-    @Column()
-    createdAt: Date;
+  @Column()
+  createdAt: Date;
 
-    constructor(){
-        if(!this.id){
-            this.id = uuid();
-        }
-        if(!this.activeAccount){
-            this.activeAccount = true;
-        }
+  constructor(){
+    if(!this.id) {
+      this.id = uuid();
     }
-
-    @BeforeInsert()
-    @BeforeUpdate()
-    async hashPassword(): Promise<void> {
-        const hash = await bcrypt.hash(this.password, 10)
-        this.password = hash
+    if(!this.activeAccount) {
+      this.activeAccount = true;
     }
+  }
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPassword(): Promise<void> {
+    const hash = await bcrypt.hash(this.password, 10)
+    this.password = hash
+  }
 }
 
-export {Patient}
+export { Patient }

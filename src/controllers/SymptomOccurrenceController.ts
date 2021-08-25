@@ -1,7 +1,12 @@
 import { Request, Response } from "express";
-import { getCustomRepository } from "typeorm";
+import { getCustomRepository, In } from "typeorm";
 import { SymptomOccurrence } from "../models";
-import { DiseaseOccurrenceRepository, SymptomOccurrenceRepository, SymptomRepository } from "../repositories";
+import { 
+  DiseaseOccurrenceRepository, 
+  PatientsRepository, 
+  SymptomOccurrenceRepository, 
+  SymptomRepository 
+} from "../repositories";
 class SymptomOccurrenceController {
   async create(request: Request, response: Response){
     const body = request.body
@@ -10,126 +15,142 @@ class SymptomOccurrenceController {
       body.symptom_name = body.symptom_name.trim()
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Sintoma não digitado"
       })
     }
 
+    const patientsRepository = getCustomRepository(PatientsRepository)
     const symptomOccurrenceRepository = getCustomRepository(SymptomOccurrenceRepository)
     const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
     const symptomRepository = getCustomRepository(SymptomRepository)
 
-    const IsValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
-      id: body.disease_occurrence_id
+    const isValidPatient = await patientsRepository.findOne({
+      id: body.patient_id
     })
 
-    if(!IsValidDiseaseOccurrence) {
+    if(!isValidPatient) {
       return response.status(404).json({
-        error: "Disease occurrence id not valid!"
+        error: "Paciente não encontrado"
       })
     }
     
-    const IsValidSymptom = await symptomRepository.findOne({
+    const isValidSymptom = await symptomRepository.findOne({
       symptom: body.symptom_name
     })
 
-    if(!IsValidSymptom) {
+    if(!isValidSymptom) {
       return response.status(404).json({
-        error: "Symptom not found!"
+        error: "Sintoma não encontrado"
       })
     }
 
-    const IsSymptomAlreadyRegistered = await symptomOccurrenceRepository.findOne({
-      disease_occurrence_id: body.disease_occurrence_id,
-      symptom_name: body.symptom_name
+    const existOngoingDiseaseOccurrences = await diseaseOccurrenceRepository.find({
+      where: {
+        patient_id: body.patient_id,
+        status: In(["Suspeito", "Infectado"]),
+      }
     })
 
-    if(IsSymptomAlreadyRegistered) {
-      return response.status(406).json({
-        error: "Symptom has already been registered for this occurrence"
-      })
+    body.registered_date = new Date()
+
+    if(existOngoingDiseaseOccurrences.length == 0) {
+      try {
+        body.disease_occurrence_id = undefined
+        const symptomOccurrence = symptomOccurrenceRepository.create(body)
+        await symptomOccurrenceRepository.save(symptomOccurrence)
+    
+        return response.status(201).json({
+          message: "Sintoma registrado com sucesso"
+        })
+      } catch (error) {
+        return response.status(403).json({
+          error: "Erro no cadastro do sintoma"
+        })
+      } 
     }
 
-    try {
-      const symptomOccurrence = symptomOccurrenceRepository.create(body)
-      await symptomOccurrenceRepository.save(symptomOccurrence)
-  
-      return response.status(201).json(symptomOccurrence)
-    } catch (error) {
-      return response.status(403).json({
-        error: error.message
+    else {
+      existOngoingDiseaseOccurrences.forEach(async (diseaseOccurrence) => {
+        try {
+          body.disease_occurrence_id = diseaseOccurrence.id
+          const symptomOccurrence = symptomOccurrenceRepository.create(body)
+          await symptomOccurrenceRepository.save(symptomOccurrence)
+        } catch (error) {
+          return response.status(403).json({
+            error: "Erro no cadastro do sintoma"
+          })
+        }
+      })
+      return response.status(201).json({
+        message: "Sintoma registrado com sucesso"
       })
     }
   }
 
   async list(request: Request, response: Response) {
-    const {disease_occurrence_id, symptom_name} = request.query
+    const { patient_id, symptom_name, disease_occurrence_id } = request.query
     const symptomOccurrenceRepository = getCustomRepository(SymptomOccurrenceRepository)
 
-    if(!disease_occurrence_id && !symptom_name) {
+    let filters = {}
+
+    if(patient_id) {
+      filters = {...filters, patient_id: String(patient_id)}
+    }
+
+    if(symptom_name) {
+      filters = {...filters, symptom_name: String(symptom_name)}
+    }
+
+    if(disease_occurrence_id) {
+      filters = {...filters, disease_occurrence_id: String(disease_occurrence_id)}
+    }
+
+    const hasQueryParams = Object.keys(filters).length
+
+    if(!hasQueryParams) {
       const occurrencesList = await symptomOccurrenceRepository.find()
-      return response.status(200).json(occurrencesList)
-    } else if (!disease_occurrence_id && symptom_name) {
-      const symptomRepository = getCustomRepository(SymptomRepository)
-      const IsValidSymptom = await symptomRepository.findOne({
-        symptom: String(symptom_name)
-      })
-
-      if(!IsValidSymptom) {
-        return response.status(404).json({
-          error: "Symptom not found!"
-        })
-      }
-
-      const occurrencesList = await symptomOccurrenceRepository.find({
-        symptom_name: String(symptom_name)
-      })
-
-      return response.status(200).json(occurrencesList)
-    } else if(disease_occurrence_id && !symptom_name) {
-      const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
-      const IsValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
-        id: String(disease_occurrence_id)
-      })
-
-      if(!IsValidDiseaseOccurrence) {
-        return response.status(404).json({
-          error: "Disease occurrence id not valid!"
-        })
-      }
-
-      const occurrencesList = await symptomOccurrenceRepository.find({
-        disease_occurrence_id: String(disease_occurrence_id)
-      })
-
       return response.status(200).json(occurrencesList)
     } else {
       const symptomRepository = getCustomRepository(SymptomRepository)
       const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
+      const patientsRepository = getCustomRepository(PatientsRepository)
 
-      const IsValidSymptom = await symptomRepository.findOne({
-        symptom: String(symptom_name)
-      })
-
-      if(!IsValidSymptom) {
-        return response.status(404).json({
-          error: "Symptom not found!"
+      if(patient_id) {
+        const isValidPatient = await patientsRepository.findOne({
+          id: String(patient_id)
         })
+  
+        if(!isValidPatient) {
+          return response.status(404).json({
+            error: "Paciente não encontrado"
+          })
+        }
       }
 
-      const IsValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
-        id: String(disease_occurrence_id)
-      })
-
-      if(!IsValidDiseaseOccurrence) {
-        return response.status(404).json({
-          error: "Disease occurrence id not valid!"
+      if(symptom_name) {
+        const isValidSymptom = await symptomRepository.findOne({
+          symptom: String(symptom_name)
         })
+  
+        if(!isValidSymptom) {
+          return response.status(404).json({
+            error: "Sintoma não encontrado"
+          })
+        }
       }
 
-      const occurrencesList = await symptomOccurrenceRepository.find({
-        disease_occurrence_id: String(disease_occurrence_id),
-        symptom_name: String(symptom_name)
-      })
+      if(disease_occurrence_id) {
+        const isValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
+          id: String(disease_occurrence_id)
+        })
+  
+        if(!isValidDiseaseOccurrence) {
+          return response.status(404).json({
+            error: "Ocorrência de doença não encontrada"
+          })
+        }
+      }
+      const occurrencesList = await symptomOccurrenceRepository.find(filters)
 
       return response.status(200).json(occurrencesList)
     }
@@ -137,41 +158,17 @@ class SymptomOccurrenceController {
 
   async alterOne(request: Request, response: Response) {
     const body = request.body
-    const {disease_occurrence_id, symptom_name} = request.params
+    const { symptom_occurrence_id } = request.params
 
     const symptomOccurrenceRepository = getCustomRepository(SymptomOccurrenceRepository)
-    const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
-    const symptomRepository = getCustomRepository(SymptomRepository)
 
-    const IsValidSymptom = await symptomRepository.findOne({
-      symptom: symptom_name
+    const isValidSymptomOccurrence = await symptomOccurrenceRepository.findOne({ 
+      id: symptom_occurrence_id
     })
 
-    if(!IsValidSymptom) {
+    if(!isValidSymptomOccurrence) {
       return response.status(404).json({
-        error: "Symptom not found!"
-      })
-    }
-
-    const IsValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
-      id: disease_occurrence_id
-    })
-
-    if(!IsValidDiseaseOccurrence) {
-      return response.status(404).json({
-        error: "Disease occurrence id not valid!"
-      })
-    }
-
-    const IsValidSymptomOccurrence = await symptomOccurrenceRepository.findOne({
-      disease_occurrence_id: String(disease_occurrence_id),
-      symptom_name: String(symptom_name)
-    })
-
-
-    if(!IsValidSymptomOccurrence) {
-      return response.status(404).json({
-        error: "Symptom not registered for this disease occurrence"
+        error: "Ocorrência de sintoma inválida"
       })
     }
 
@@ -179,53 +176,30 @@ class SymptomOccurrenceController {
       await symptomOccurrenceRepository.createQueryBuilder()
         .update(SymptomOccurrence)
         .set(body)
-        .where("disease_occurrence_id = :disease_occurrence_id and symptom_name = :symptom_name", 
-          {symptom_name: symptom_name, disease_occurrence_id: disease_occurrence_id})
+        .where("id = :id", { id: symptom_occurrence_id })
         .execute()
-      return response.status(200).json(body)
+      return response.status(200).json({
+        message: "Ocorrência de doença atualizada"
+      })
     } catch (error) {
       return response.status(403).json({
-        error: "Symptom already registered for this disease occurrence"
+        error: "Erro na atualização do sintoma"
       })
     }
   }
 
   async deleteOne(request: Request, response: Response) {
-    const {disease_occurrence_id, symptom_name} = request.params
+    const { symptom_occurrence_id } = request.params
 
     const symptomOccurrenceRepository = getCustomRepository(SymptomOccurrenceRepository)
-    const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
-    const symptomRepository = getCustomRepository(SymptomRepository)
 
-    const IsValidSymptom = await symptomRepository.findOne({
-      symptom: symptom_name
+    const isValidSymptomOccurrence = await symptomOccurrenceRepository.findOne({ 
+      id: symptom_occurrence_id
     })
 
-    if(!IsValidSymptom) {
+    if(!isValidSymptomOccurrence) {
       return response.status(404).json({
-        error: "Symptom not found!"
-      })
-    }
-
-    const IsValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
-      id: disease_occurrence_id
-    })
-
-    if(!IsValidDiseaseOccurrence) {
-      return response.status(404).json({
-        error: "Disease occurrence id not valid!"
-      })
-    }
-
-    const IsValidSymptomOccurrence = await symptomOccurrenceRepository.findOne({
-      disease_occurrence_id: disease_occurrence_id,
-      symptom_name: symptom_name
-    })
-
-
-    if(!IsValidSymptomOccurrence) {
-      return response.status(404).json({
-        error: "Symptom occurrence not found"
+        error: "Ocorrência de sintoma inválida"
       })
     }
 
@@ -233,15 +207,14 @@ class SymptomOccurrenceController {
       await symptomOccurrenceRepository.createQueryBuilder()
         .delete()
         .from(SymptomOccurrence)
-        .where("disease_occurrence_id = :disease_occurrence_id and symptom_name = :symptom_name", 
-          {symptom_name: symptom_name, disease_occurrence_id: disease_occurrence_id})
+        .where("id = :id", { id: symptom_occurrence_id })
         .execute()
       return response.status(200).json({
-        message: "Symptom occurrence deleted"
+        message: "Ocorrência de doença deletada"
       })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na deleção do sintoma"
       })
     }
   }

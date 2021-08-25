@@ -13,7 +13,6 @@ class USM{
 
   @Column()
   longitude: Number
-
 }
 
-export {USM}
+export { USM }

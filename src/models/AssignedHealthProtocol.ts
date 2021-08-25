@@ -4,18 +4,17 @@ import { HealthProtocol } from "./HealthProtocol";
 
 @Entity("assigned_healthprotocol")
 class AssignedHealthProtocol {
-    @PrimaryColumn()
-    disease_name: string;
+  @PrimaryColumn()
+  disease_name: string;
 
-    @JoinColumn({name: "disease_name"})
-    disease: Disease
+  @JoinColumn({ name: "disease_name" })
+  disease: Disease
 
-    @PrimaryColumn()
-    healthprotocol_description: string;
+  @PrimaryColumn()
+  healthprotocol_description: string;
 
-    @JoinColumn({name: "healthprotocol_description"})
-    healthprotocol: HealthProtocol
-
+  @JoinColumn({ name: "healthprotocol_description" })
+  healthprotocol: HealthProtocol
 }
 
 export { AssignedHealthProtocol };
