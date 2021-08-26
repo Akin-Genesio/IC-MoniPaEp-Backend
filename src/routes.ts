@@ -108,9 +108,6 @@ router.get("/symptom", symptomController.list)//geral
 router.put("/symptom/:symptom_name", jwt.authMiddleware, jwt.localAdminMiddleware, symptomController.alterOne)//adm e adm locais
 router.delete("/symptom/:symptom_name", jwt.authMiddleware, jwt.localAdminMiddleware, symptomController.deleteOne)//adm e adm locais
 
-// Symptom Suggestions Routes - TBD
-
-
 //DiseaseOccurrence Routes
 router.post("/diseaseoccurrence", jwt.authMiddleware, diseaseOccurrenceController.create)//geral autenticado*
 router.get("/diseaseoccurrence", jwt.authMiddleware, diseaseOccurrenceController.list)//geral autenticado
@@ -121,8 +118,8 @@ router.delete("/diseaseoccurrence/:id", jwt.authMiddleware, diseaseOccurrenceCon
 //SymptomOccurrence Routes
 router.post("/symptomoccurrence", jwt.authMiddleware, symptomOccurrenceController.create)//geral autenticado*
 router.get("/symptomoccurrence", jwt.authMiddleware, symptomOccurrenceController.list)//geral autenticado
-router.put("/symptomoccurrence/:symptom_occurrence_id", symptomOccurrenceController.alterOne)//geral autenticado*
-router.delete("/symptomoccurrence/:disease_occurrence_id/:symptom_name", jwt.authMiddleware, symptomOccurrenceController.deleteOne)//geral autenticado*
+router.put("/symptomoccurrence/:symptom_occurrence_id", jwt.authMiddleware, symptomOccurrenceController.alterOne)//geral autenticado*
+router.delete("/symptomoccurrence/:symptom_occurrence_id", jwt.authMiddleware, symptomOccurrenceController.deleteOne)//geral autenticado*
 
 //AssignedHealthProtocol Routes
 router.post("/assignedhealthprotocol", jwt.authMiddleware, jwt.systemUserMiddleware, assignedHealthProtocolController.create)//usuario do sistema autenticado
@@ -147,4 +144,4 @@ router.post("/faqsuggestions", faqSuggestionsController.create)
 router.get("/faqsuggestions", faqSuggestionsController.list)
 router.delete("/faqsuggestions/:question", jwt.authMiddleware, jwt.systemUserMiddleware, faqSuggestionsController.deleteOne)
 
-export { router };
+export { router }

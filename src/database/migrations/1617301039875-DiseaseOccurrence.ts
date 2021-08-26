@@ -13,23 +13,33 @@ export class DiseaseOccurrence1617301039875 implements MigrationInterface {
           },
           {
             name: "patient_id",
-            type: "uuid"
+            type: "uuid",
+            isNullable: false,
           },
           {
-            name: "date_start",
-            type: "datetime"
+            name: "disease_name",
+            type: "varchar",
+            isNullable: false,
           },
           {
             name: "diagnosis",
             type: "varchar",
+            isNullable: true,
           },
           {
-            name: "disease_name",
-            type: "varchar"
+            name: "date_start",
+            type: "datetime",
+            isNullable: true,
+          },
+          {
+            name: "date_end",
+            type: "datetime",
+            isNullable: true,
           },
           {
             name: "status",
-            type: "varchar"
+            type: "varchar",
+            isNullable: false,
           }
         ],
         foreignKeys: [

@@ -15,10 +15,13 @@ class DiseaseOccurrence {
   disease_name: string
 
   @Column()
+  diagnosis: string
+
+  @Column()
   date_start: Date
 
   @Column()
-  diagnosis: string
+  date_end: Date
 
   @Column()
   status: string

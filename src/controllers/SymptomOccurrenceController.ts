@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { getCustomRepository, In } from "typeorm";
+
 import { SymptomOccurrence } from "../models";
 import { 
   DiseaseOccurrenceRepository, 
@@ -179,7 +180,7 @@ class SymptomOccurrenceController {
         .where("id = :id", { id: symptom_occurrence_id })
         .execute()
       return response.status(200).json({
-        message: "Ocorrência de doença atualizada"
+        message: "Ocorrência de doença atualizada com sucesso"
       })
     } catch (error) {
       return response.status(403).json({
@@ -210,7 +211,7 @@ class SymptomOccurrenceController {
         .where("id = :id", { id: symptom_occurrence_id })
         .execute()
       return response.status(200).json({
-        message: "Ocorrência de doença deletada"
+        message: "Ocorrência de doença deletada com sucesso"
       })
     } catch (error) {
       return response.status(403).json({

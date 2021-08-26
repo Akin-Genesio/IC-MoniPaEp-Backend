@@ -1,14 +1,22 @@
 import { Request, Response } from "express";
-import { getCustomRepository } from "typeorm";
-import { DiseaseOccurrence } from "../models";
-import { DiseaseOccurrenceRepository, DiseaseRepository, PatientsRepository } from "../repositories";
+import { getCustomRepository, IsNull } from "typeorm";
+
+import { DiseaseOccurrence, SymptomOccurrence } from "../models";
+import { 
+  DiseaseOccurrenceRepository, 
+  DiseaseRepository, 
+  PatientsRepository, 
+  SymptomOccurrenceRepository 
+} from "../repositories";
+
 class DiseaseOccurrenceController {
   async create(request: Request, response: Response) {
     const body = request.body
 
-    const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
     const patientsRepository = getCustomRepository(PatientsRepository)
     const diseasesRepository = getCustomRepository(DiseaseRepository)
+    const symptomOccurrenceRepository = getCustomRepository(SymptomOccurrenceRepository)
+    const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
 
     const patientExists = await patientsRepository.findOne({
       id: body.patient_id
@@ -16,30 +24,77 @@ class DiseaseOccurrenceController {
 
     if(!patientExists) {
       return response.status(404).json({
-        error: "Patient id is not valid!"
+        error: "Paciente inválido"
       })
     }
 
-    const diseaseExists = await diseasesRepository.findOne({
-      name: body.disease_name
+    let createdDiseaseOccurrences = []
+
+    for (let i in body.disease_name) {
+      const validDisease = await diseasesRepository.findOne({
+        name: body.disease_name[i]
+      })
+
+      if(!validDisease) {
+        return response.status(403).json({
+          error: `A doença '${body.disease_name[i]}' não se encontra cadastrada no sistema`
+        })
+      }
+
+      const diseaseOccurrenceBody = diseaseOccurrenceRepository.create({
+        ...body,
+        disease_name: body.disease_name[i]
+      })
+
+      const diseaseOccurrence = await diseaseOccurrenceRepository.save(diseaseOccurrenceBody)
+      createdDiseaseOccurrences.push(diseaseOccurrence)
+      //console.log(diseaseOccurrence)
+    }
+
+    const numberOfDiseaseOccurrences = createdDiseaseOccurrences.length
+
+    const notAssignedSymptomOccurrences = await symptomOccurrenceRepository.find({
+      patient_id: body.patient_id,
+      disease_occurrence_id: IsNull()
     })
 
-    if(!diseaseExists) {
-      return response.status(404).json({
-        error: "Disease name is not valid!"
-      })
+    for (const symptomOccurrence of notAssignedSymptomOccurrences) {
+      try {
+        await symptomOccurrenceRepository.createQueryBuilder()
+        .update(SymptomOccurrence)
+          .set({
+            disease_occurrence_id: createdDiseaseOccurrences[0].id
+          })
+          .where("id = :id", { id: symptomOccurrence.id })
+          .execute()
+      } catch (error) {
+        return response.status(403).json({
+          error: "Erro na atualização do sintoma"
+        })
+      }
     }
-
-    try {
-      const diseaseOccurrence =  diseaseOccurrenceRepository.create(body)
-      await diseaseOccurrenceRepository.save(diseaseOccurrence)
-
-      return response.status(201).json(diseaseOccurrence)
-    } catch (error) {
-      return response.status(403).json({
-        error: error.message
-      })
-    }
+      
+    if(numberOfDiseaseOccurrences > 1) {
+      for (let i = 1; i < numberOfDiseaseOccurrences; i++) {
+        for (const symptomOccurrence of notAssignedSymptomOccurrences) {
+          try {
+            const symptomOccurrenceBody = symptomOccurrenceRepository.create({
+              patient_id: symptomOccurrence.patient_id,
+              symptom_name: symptomOccurrence.symptom_name,
+              registered_date: symptomOccurrence.registered_date,
+              disease_occurrence_id: createdDiseaseOccurrences[i].id
+            })
+            await symptomOccurrenceRepository.save(symptomOccurrenceBody)
+          } catch (error) {
+            return response.status(403).json({
+              error: "Erro na atualização do sintoma."
+            })
+          }
+        }
+      }
+    } 
+    
+    return response.status(201).json(createdDiseaseOccurrences)
   }
 
   async list (request: Request, response: Response) {
