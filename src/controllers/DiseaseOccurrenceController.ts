@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { getCustomRepository, IsNull } from "typeorm";
 
-import { DiseaseOccurrence, SymptomOccurrence } from "../models";
+import { DiseaseOccurrence, Patient, SymptomOccurrence } from "../models";
 import { 
   DiseaseOccurrenceRepository, 
   DiseaseRepository, 
@@ -58,7 +58,7 @@ class DiseaseOccurrenceController {
       disease_occurrence_id: IsNull()
     })
 
-    for (const symptomOccurrence of notAssignedSymptomOccurrences) {
+    for(const symptomOccurrence of notAssignedSymptomOccurrences) {
       try {
         await symptomOccurrenceRepository.createQueryBuilder()
         .update(SymptomOccurrence)
@@ -75,8 +75,8 @@ class DiseaseOccurrenceController {
     }
       
     if(numberOfDiseaseOccurrences > 1) {
-      for (let i = 1; i < numberOfDiseaseOccurrences; i++) {
-        for (const symptomOccurrence of notAssignedSymptomOccurrences) {
+      for(let i = 1; i < numberOfDiseaseOccurrences; i++) {
+        for(const symptomOccurrence of notAssignedSymptomOccurrences) {
           try {
             const symptomOccurrenceBody = symptomOccurrenceRepository.create({
               patient_id: symptomOccurrence.patient_id,
@@ -178,16 +178,14 @@ class DiseaseOccurrenceController {
   }
 
   async getOne(request: Request, response: Response) {
-    const {id} = request.params
+    const { id } = request.params
     const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
     
-    const OccurrenceItem = await diseaseOccurrenceRepository.findOne({
-      id: id
-    })
+    const OccurrenceItem = await diseaseOccurrenceRepository.findOne({ id })
 
     if(!OccurrenceItem){
       return response.status(404).json({
-        error: "Disease occurrence not found"
+        error: "Ocorrência de doença não encontrada"
       })
     }
 
@@ -200,53 +198,66 @@ class DiseaseOccurrenceController {
 
     const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
     const diseaseRepository = getCustomRepository(DiseaseRepository)
+    const patientsRepository = getCustomRepository(PatientsRepository)
 
-    const diseaseOccurrence = await diseaseOccurrenceRepository.findOne({
-      id: id
-    })
+    const diseaseOccurrence = await diseaseOccurrenceRepository.findOne({ id })
 
     if(!diseaseOccurrence){
       return response.status(404).json({
-        error: "Disease occurrence not found"
+        error: "Ocorrência de doença não encontrada"
       })
     }
 
-    const diseaseName = await diseaseRepository.findOne({
-      name: body.disease_name
-    })
-
-    if(!diseaseName){
-      return response.status(404).json({
-        error: "Disease name not found"
+    if(body.disease_name) {
+      const diseaseName = await diseaseRepository.findOne({
+        name: body.disease_name
       })
+  
+      if(!diseaseName){
+        return response.status(404).json({
+          error: "Doença não encontrada"
+        })
+      }
+    }
+
+    if(body.patient_id) {
+      const patient = await patientsRepository.find({
+        id: body.patient_id
+      })
+
+      if(!patient){
+        return response.status(404).json({
+          error: "Paciente não encontrado"
+        })
+      }
     }
 
     try {
       await diseaseOccurrenceRepository.createQueryBuilder()
         .update(DiseaseOccurrence)
         .set(body)
-        .where("id = :id", {id: id})
+        .where("id = :id", { id })
         .execute()
-      return response.status(200).json(body)
+      return response.status(200).json({
+        message: "Ocorrência de doença atualizada"
+      })
     } catch (error) {
       return response.status(404).json({
-        error: error.message
+        error: "Erro na atualização da ocorrência de doença"
       })
     }
   }
 
   async deleteOne(request: Request, response: Response) {
-    const {id} = request.params
+    const { id } = request.params
     
     const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
 
-    const diseaseOccurrence = await diseaseOccurrenceRepository.findOne({
-      id: id
-    })
+    const diseaseOccurrence = await diseaseOccurrenceRepository.findOne({ id })
 
     if(!diseaseOccurrence){
       return response.status(404).json({
-        error: "Disease occurrence not found"
+        error: "Ocorrência de doença não encontrada"
       })
     }
 
@@ -257,11 +268,11 @@ class DiseaseOccurrenceController {
         .where("id = :id", {id: id})
         .execute()
       return response.status(200).json({
-        message: "Disease Occurrence deleted!"
+        message: "Ocorrência de doença deletada"
       })
     } catch (error) {
       return response.status(404).json({
-        error: error.message
+        error: "Erro na deleção da ocorrência de doença"
       })
     }
   }

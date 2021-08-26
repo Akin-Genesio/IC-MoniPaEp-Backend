@@ -54,14 +54,14 @@ class SymptomOccurrenceController {
 
     body.registered_date = new Date()
 
-    if(existOngoingDiseaseOccurrences.length == 0) {
+    if(existOngoingDiseaseOccurrences.length === 0) {
       try {
         body.disease_occurrence_id = undefined
         const symptomOccurrence = symptomOccurrenceRepository.create(body)
         await symptomOccurrenceRepository.save(symptomOccurrence)
     
         return response.status(201).json({
-          message: "Sintoma registrado com sucesso"
+          success: "Sintoma registrado com sucesso"
         })
       } catch (error) {
         return response.status(403).json({
@@ -71,7 +71,7 @@ class SymptomOccurrenceController {
     }
 
     else {
-      existOngoingDiseaseOccurrences.forEach(async (diseaseOccurrence) => {
+      for(const diseaseOccurrence of existOngoingDiseaseOccurrences) {
         try {
           body.disease_occurrence_id = diseaseOccurrence.id
           const symptomOccurrence = symptomOccurrenceRepository.create(body)
@@ -81,18 +81,28 @@ class SymptomOccurrenceController {
             error: "Erro no cadastro do sintoma"
           })
         }
-      })
+      }
+
       return response.status(201).json({
-        message: "Sintoma registrado com sucesso"
+        success: "Sintoma registrado com sucesso"
       })
     }
   }
 
   async list(request: Request, response: Response) {
-    const { patient_id, symptom_name, disease_occurrence_id } = request.query
+    const { 
+      id,
+      patient_id, 
+      symptom_name, 
+      disease_occurrence_id,
+    } = request.query
     const symptomOccurrenceRepository = getCustomRepository(SymptomOccurrenceRepository)
 
     let filters = {}
+
+    if(id) {
+      filters = {...filters, id: String(id)}
+    }
 
     if(patient_id) {
       filters = {...filters, patient_id: String(patient_id)}
@@ -151,6 +161,7 @@ class SymptomOccurrenceController {
           })
         }
       }
+      
       const occurrencesList = await symptomOccurrenceRepository.find(filters)
 
       return response.status(200).json(occurrencesList)
@@ -180,7 +191,7 @@ class SymptomOccurrenceController {
         .where("id = :id", { id: symptom_occurrence_id })
         .execute()
       return response.status(200).json({
-        message: "Ocorrência de doença atualizada com sucesso"
+        success: "Ocorrência de doença atualizada com sucesso"
       })
     } catch (error) {
       return response.status(403).json({
@@ -211,7 +222,7 @@ class SymptomOccurrenceController {
         .where("id = :id", { id: symptom_occurrence_id })
         .execute()
       return response.status(200).json({
-        message: "Ocorrência de doença deletada com sucesso"
+        success: "Ocorrência de doença deletada com sucesso"
       })
     } catch (error) {
       return response.status(403).json({

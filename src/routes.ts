@@ -115,7 +115,7 @@ router.get("/diseaseoccurrence/:id", jwt.authMiddleware, diseaseOccurrenceContro
 router.put("/diseaseoccurrence/:id", jwt.authMiddleware, diseaseOccurrenceController.alterOne)//geral autenticado*
 router.delete("/diseaseoccurrence/:id", jwt.authMiddleware, diseaseOccurrenceController.deleteOne)//geral autenticado*
 
-//SymptomOccurrence Routes
+//SymptomOccurrence Routes - Ok
 router.post("/symptomoccurrence", jwt.authMiddleware, symptomOccurrenceController.create)//geral autenticado*
 router.get("/symptomoccurrence", jwt.authMiddleware, symptomOccurrenceController.list)//geral autenticado
 router.put("/symptomoccurrence/:symptom_occurrence_id", jwt.authMiddleware, symptomOccurrenceController.alterOne)//geral autenticado*
