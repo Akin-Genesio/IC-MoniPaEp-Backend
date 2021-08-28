@@ -12,7 +12,7 @@ export class AssignedHealthProtocol1617294112893 implements MigrationInterface {
             isPrimary: true
           },
           {
-            name: "healthprotocol_description",
+            name: "healthprotocol_id",
             type: "varchar",   
             isPrimary: true
           }
@@ -29,8 +29,8 @@ export class AssignedHealthProtocol1617294112893 implements MigrationInterface {
           {
             name: "FKHealthProtocol",
             referencedTableName: "healthProtocols",
-            referencedColumnNames: ["description"],
-            columnNames: ["healthprotocol_description"],
+            referencedColumnNames: ["id"],
+            columnNames: ["healthprotocol_id"],
             onUpdate: "CASCADE",
             onDelete: "CASCADE"
           }

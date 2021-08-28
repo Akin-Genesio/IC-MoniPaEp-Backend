@@ -8,67 +8,75 @@ class HealthProtocolController {
     const body = request.body
 
     const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
-    const IsAlreadyRegistered = await healthProtocolRepository.findOne({
+    const isAlreadyRegistered = await healthProtocolRepository.findOne({
       description: body.description
     })
 
-    if (IsAlreadyRegistered) {
+    if (isAlreadyRegistered) {
       return response.status(400).json({
-        error: "Health protocol has already been registered!"
+        error: "Protocolo de saúde já registrado"
       })
     }
 
     try {
-      const healthProtocol = healthProtocolRepository.create(body)
-      await healthProtocolRepository.save(healthProtocol)
+      const healthProtocolBody = healthProtocolRepository.create(body)
+      const healthProtocol = await healthProtocolRepository.save(healthProtocolBody)
 
-      return response.status(201).json(healthProtocol)
+      return response.status(201).json({
+        message: "Protocolo de saúde registrado com sucesso",
+        health_protocol: healthProtocol
+      })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro no registro do protocolo de saúde"
       })
     }    
   }
 
   async list(request: Request, response: Response){
+    const { id } = request.query
+    
     const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
 
+    if(id) {
+      const isValidHealthProtocol = await healthProtocolRepository.findOne({
+        id: String(id)
+      })
+
+      if(!isValidHealthProtocol) {
+        return response.status(400).json({
+          error: "Protocolo de saúde inválido"
+        })
+      }
+
+      return response.status(200).json(isValidHealthProtocol)
+    }
     const healthProtocolList = await healthProtocolRepository.find()
 
-    return response.json(healthProtocolList)
-  }
-
-  async getOne(request: Request, response: Response){
-    const {description} = request.params
-
-    const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
-
-    const health_protocol = await healthProtocolRepository.findOne({
-      description: description
-    })
-    
-    if(!health_protocol){
-      return response.status(404).json({
-        error: "Health Protocol not found"
-      })
-    }
-
-    return response.status(302).json(health_protocol)
+    return response.status(200).json(healthProtocolList)
   }
 
   async alterOne(request: Request, response: Response){
     const body = request.body
-    const {description} = request.params
+    const { id } = request.params
 
     const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
 
-    const health_protocol = await healthProtocolRepository.findOne({
-      description: description
-    })
+    const isValidHealthProtocol = await healthProtocolRepository.findOne({ id })
     
-    if(!health_protocol){
+    if(!isValidHealthProtocol){
       return response.status(404).json({
-        error: "Health Protocol not found"
+        error: "Protocolo de saúde não encontrado"
+      })
+    }
+
+    const isAlreadyRegistered = await healthProtocolRepository.findOne({
+      description: body.description
+    })
+
+    if (isAlreadyRegistered) {
+      return response.status(400).json({
+        error: "Protocolo de saúde já registrado"
       })
     }
 
@@ -76,28 +84,28 @@ class HealthProtocolController {
       await healthProtocolRepository.createQueryBuilder()
         .update(HealthProtocol)
         .set(body)
-        .where("description = :description", { description: description })
+        .where("id = :id", { id })
         .execute();
-      return response.status(200).json(body)
+      return response.status(200).json({
+        success: "Protocolo de saúde alterado com sucesso"
+      })
     } catch (error) {
       return response.status(403).json({
-        error: "Health Protocol already registered"
+        error: "Erro na atualização do protocolo de saúde"
       })
     }
   }
 
   async deleteOne(request: Request, response: Response){
-    const {description} = request.params
+    const { id } = request.params
 
     const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
 
-    const health_protocol = await healthProtocolRepository.findOne({
-      description: description
-    })
+    const isValidHealthProtocol = await healthProtocolRepository.findOne({ id })
     
-    if(!health_protocol){
+    if(!isValidHealthProtocol){
       return response.status(404).json({
-        error: "Health Protocol not found"
+        error: "Protocolo de saúde não encontrado"
       })
     }
 
@@ -105,14 +113,14 @@ class HealthProtocolController {
       await healthProtocolRepository.createQueryBuilder()
         .delete()
         .from(HealthProtocol)
-        .where("description = :description", { description: description })
+        .where("id = :id", { id })
         .execute();
       return response.status(200).json({
-        message: "Health Protocol deleted"
+        success: "Protocolo de saúde deletado com sucesso"
       })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na deleção do protocolo de saúde"
       })
     }
   }

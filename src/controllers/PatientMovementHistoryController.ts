@@ -35,83 +35,68 @@ class PatientMovementHistoryController {
   }
 
   async list(request: Request, response: Response) {
-    const {disease_occurrence_id, description} = request.query
+    const { disease_occurrence_id, id } = request.query
+
     const patientMovementRepository = getCustomRepository(PatientMovementHistoryRepository)
-    
-    if(!disease_occurrence_id && !description) {
+    let filters = {}
+
+    if(id) {
+      filters = { ...filters, id: String(id) }
+    }
+
+    if(disease_occurrence_id) {
+      filters = { ...filters, disease_occurrence_id: String(disease_occurrence_id) }
+    }
+
+    const hasQueryParams = Object.keys(filters).length
+
+    if(!hasQueryParams) {
       const movementHistory = await patientMovementRepository.find()
+
       return response.status(200).json(movementHistory)
-    } else if (disease_occurrence_id && !description) {
-      const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
-
-      const isValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
-        id: String(disease_occurrence_id)
-      })
-
-      if (!isValidDiseaseOccurrence) {
-        return response.status(404).json({
-          error: "Disease occurrence is not valid"
-        })
-      }
-
-      const movementHistoryList = await patientMovementRepository.find({
-        disease_occurrence_id: String(disease_occurrence_id)
-      })
-
-      return response.status(200).json(movementHistoryList)
-    } else if(!disease_occurrence_id && description) {          
-      const movementHistoryList = await patientMovementRepository.find({
-        description: String(description)
-      })
-
-      return response.status(200).json(movementHistoryList)
     } else {
-      const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
-
-      const isValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
-        id: String(disease_occurrence_id)
-      })
-
-      if (!isValidDiseaseOccurrence) {
-        return response.status(404).json({
-          error: "Disease occurrence is not valid"
+      if(disease_occurrence_id) {
+        const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
+        const isValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
+          id: String(disease_occurrence_id)
         })
+  
+        if (!isValidDiseaseOccurrence) {
+          return response.status(404).json({
+            error: "Ocorrência de doença não encontrada"
+          })
+        }
       }
 
-      const movementHistoryItem = await patientMovementRepository.findOne({
-        disease_occurrence_id: String(disease_occurrence_id),
-        description: String(description)
-      })
+      if(id) {
+        const isValidPatientMovementHistory = await patientMovementRepository.findOne({
+          id: String(id)
+        })
+        console.log(isValidPatientMovementHistory)
 
-      return response.status(200).json(movementHistoryItem)
+        if (!isValidPatientMovementHistory) {
+          return response.status(404).json({
+            error: "Histórico de movimentação não encontrado"
+          })
+        }
+      }
+      const movementHistoryItems = await patientMovementRepository.find(filters)
+
+      return response.status(200).json(movementHistoryItems)
     }
   }
 
   async alterOne(request: Request, response: Response) {
     const body = request.body
-    const {disease_occurrence_id, description} = request.params
+    const { id } = request.params
             
     const patientMovementRepository = getCustomRepository(PatientMovementHistoryRepository)
-    const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
 
-    const isValidId = await diseaseOccurrenceRepository.findOne({
-      id: disease_occurrence_id
-    })
+    const isValidMovement = await patientMovementRepository.findOne({ id })
 
-    if(!isValidId) {
+    if(!isValidMovement) {
       return response.status(404).json({
-        error: "Disease occurrence is not valid"
-      })
-    }
-
-    const isValidDescription = await patientMovementRepository.findOne({
-      disease_occurrence_id: disease_occurrence_id,
-      description: description
-    })
-
-    if(!isValidDescription) {
-      return response.status(404).json({
-        error: "Movement history not found for this disease occurrence"
+        error: "Histórico de movimentação não encontrado"
       })
     }
 
@@ -119,41 +104,28 @@ class PatientMovementHistoryController {
       await patientMovementRepository.createQueryBuilder()
         .update(PatientMovementHistory)
         .set(body)
-        .where("disease_occurrence_id = :disease_occurrence_id and description = :description", 
-            {disease_occurrence_id: disease_occurrence_id, description: description})
+        .where("id = :id", { id })
         .execute()
-      return response.status(200).json(body)
+      return response.status(200).json({
+        success: "Histórico de movimentação alterado com sucesso",
+      })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na atualização do histórico de movimentação"
       })
     }
   }
 
   async deleteOne(request: Request, response: Response) {
-    const {disease_occurrence_id, description} = request.params
+    const { id } = request.params
             
     const patientMovementRepository = getCustomRepository(PatientMovementHistoryRepository)
-    const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
 
-    const isValidId = await diseaseOccurrenceRepository.findOne({
-      id: disease_occurrence_id
-    })
+    const isValidMovement = await patientMovementRepository.findOne({ id })
 
-    if(!isValidId) {
+    if(!isValidMovement) {
       return response.status(404).json({
-        error: "Disease occurrence is not valid"
-      })
-    }
-
-    const isValidDescription = await patientMovementRepository.findOne({
-      disease_occurrence_id: disease_occurrence_id,
-      description: description
-    })
-
-    if(!isValidDescription) {
-      return response.status(404).json({
-        error: "Movement history not found for this disease occurrence"
+        error: "Histórico de movimentação não encontrado"
       })
     }
 
@@ -161,15 +133,14 @@ class PatientMovementHistoryController {
       await patientMovementRepository.createQueryBuilder()
         .delete()
         .from(PatientMovementHistory)
-        .where("disease_occurrence_id = :disease_occurrence_id and description = :description", 
-            {disease_occurrence_id: disease_occurrence_id, description: description})
+        .where("id = :id", { id })
         .execute()
       return response.status(200).json({
-        message: "Movement history for this disease occurrence deleted!"
+        success: "Histórico de movimentação deletado com sucesso"
       })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na deleção do histórico de movimentação"
       })
     }
   }

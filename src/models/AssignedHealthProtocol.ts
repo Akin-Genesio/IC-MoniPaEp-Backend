@@ -11,9 +11,9 @@ class AssignedHealthProtocol {
   disease: Disease
 
   @PrimaryColumn()
-  healthprotocol_description: string;
+  healthprotocol_id: string;
 
-  @JoinColumn({ name: "healthprotocol_description" })
+  @JoinColumn({ name: "healthprotocol_id" })
   healthprotocol: HealthProtocol
 }
 

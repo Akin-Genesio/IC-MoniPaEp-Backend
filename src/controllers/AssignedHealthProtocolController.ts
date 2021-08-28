@@ -13,129 +13,94 @@ class AssignedHealthProtocolController {
     const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
     const diseaseRepository = getCustomRepository(DiseaseRepository)
 
-    const IsValidDisease = await diseaseRepository.findOne({
+    const isValidDisease = await diseaseRepository.findOne({
       name: body.disease_name
     })
 
-    if(!IsValidDisease) {
+    if(!isValidDisease) {
       return response.status(400).json({
-        error: "Disease name not found"
+        error: "Doença não encontrada"
       })
     }
 
-    const healthProtocolExists = await healthProtocolRepository.findOne({
-      description: body.healthprotocol_description
+    const isValidHealthProtocol = await healthProtocolRepository.findOne({
+      id: body.healthprotocol_id
     })
     
-    if(!healthProtocolExists) {
+    if(!isValidHealthProtocol) {
       return response.status(400).json({
-        error: "Health protocol is not valid"
+        error: "Protocolo de saúde não encontrado"
       })
     }
 
-    const IsAlreadyAssigned = await assignedHealthProtocolRepository.findOne({
+    const isAlreadyAssigned = await assignedHealthProtocolRepository.findOne({
       disease_name: body.disease_name,
-      healthprotocol_description: body.healthprotocol_description
+      healthprotocol_id: body.healthprotocol_id
     })
 
-    if(IsAlreadyAssigned) {
+    if(isAlreadyAssigned) {
       return response.status(406).json({
-        error: "Protocol has already been assigned for this disease"
+        error: "Este protocolo de saúde já está atribuído à essa doença"
       })
     }
 
     try {
-      const assignedHealthProtocol = assignedHealthProtocolRepository.create(body)
-      await assignedHealthProtocolRepository.save(assignedHealthProtocol)
+      const assignedHealthProtocolBody = assignedHealthProtocolRepository.create(body)
+      const assignedHealthProtocol = await assignedHealthProtocolRepository.save(assignedHealthProtocolBody)
   
-      return response.status(201).json(assignedHealthProtocol)
+      return response.status(201).json({
+        success: "Protocolo de saúde atribuído à essa doença com sucesso",
+        assigned_health_protocol: assignedHealthProtocol
+      })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na atribuição do protocolo de saúde à essa doença"
       })
     }
   }
 
   async list(request: Request, response: Response) {
-    const {healthprotocol_description, disease_name} = request.query
-    
+    const { disease_name, healthprotocol_id } = request.query
+
+    let filters = {}
+
+    if(disease_name) {
+      filters = { ...filters, disease_name: String(disease_name) }
+
+      const diseaseRepository = getCustomRepository(DiseaseRepository)
+      const diseaseExists = await diseaseRepository.findOne({
+        name: String(disease_name)
+      })
+
+      if(!diseaseExists) {
+        return response.status(404).json({
+          error: "Doença não encontrada"
+        })
+      }
+    }
+
+    if(healthprotocol_id) {
+      filters = { ...filters, healthprotocol_id: String(healthprotocol_id) }
+
+      const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
+      const healthProtocolExists = await healthProtocolRepository.findOne({
+        id: String(healthprotocol_id)
+      })
+      
+      if(!healthProtocolExists) {
+        return response.status(404).json({
+          error: "Protocolo de saúde não encontrado"
+        })
+      }
+    }
     const assignedHealthProtocolRepository = getCustomRepository(AssignedHealthProtocolRepository)
 
-    if(!healthprotocol_description && !disease_name) {
-      const associationsList = await assignedHealthProtocolRepository.find()
-
-      return response.status(200).json(associationsList)
-    } else if(!healthprotocol_description && disease_name) {
-      const diseaseRepository = getCustomRepository(DiseaseRepository)
-
-      const diseaseExists = await diseaseRepository.findOne({
-        name: String(disease_name)
-      })
-
-      if(!diseaseExists) {
-        return response.status(404).json({
-          error: "Disease name not found"
-        })
-      }
-
-      const associationsList = await assignedHealthProtocolRepository.find({
-        disease_name: String(disease_name)
-      })
-
-      return response.status(200).json(associationsList)
-    } else if(healthprotocol_description && !disease_name) {
-      const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
-
-      const healthProtocolExists = await healthProtocolRepository.findOne({
-        description: String(healthprotocol_description)
-      })
-      
-      if(!healthProtocolExists) {
-        return response.status(404).json({
-          error: "Health protocol is not valid"
-        })
-      }
-
-      const associationsList = await assignedHealthProtocolRepository.find({
-        healthprotocol_description: String(healthprotocol_description)
-      })
-
-      return response.status(200).json(associationsList)
-    } else {
-      const diseaseRepository = getCustomRepository(DiseaseRepository)
-      const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
-
-      const diseaseExists = await diseaseRepository.findOne({
-        name: String(disease_name)
-      })
-
-      if(!diseaseExists) {
-        return response.status(404).json({
-          error: "Disease name not found"
-        })
-      }
-
-      const healthProtocolExists = await healthProtocolRepository.findOne({
-        description: String(healthprotocol_description)
-      })
-      
-      if(!healthProtocolExists) {
-        return response.status(404).json({
-          error: "Health protocol is not valid"
-        })
-      }
-
-      const associationItem = await assignedHealthProtocolRepository.find({
-        healthprotocol_description: String(healthprotocol_description),
-        disease_name: String(disease_name)
-      })
-
-      return response.status(200).json(associationItem)
-    }
+    const associationList = await assignedHealthProtocolRepository.find(filters)
+    return response.status(200).json(associationList)
   }
 
   async deleteOne(request: Request, response: Response) {
-    const {healthprotocol_description, disease_name} = request.params
+    const { disease_name, healthprotocol_id} = request.params
     
     const assignedHealthProtocolRepository = getCustomRepository(AssignedHealthProtocolRepository)
     const diseaseRepository = getCustomRepository(DiseaseRepository)
@@ -147,28 +112,28 @@ class AssignedHealthProtocolController {
 
     if(!diseaseExists) {
       return response.status(404).json({
-        error: "Disease name not found"
+        error: "Doença não encontrada"
       })
     }
 
     const healthProtocolExists = await healthProtocolRepository.findOne({
-      description: String(healthprotocol_description)
+      id: String(healthprotocol_id)
     })
     
     if(!healthProtocolExists) {
       return response.status(404).json({
-        error: "Health protocol is not valid"
+        error: "Protocolo de saúde não encontrado"
       })
     }
 
     const associationExists = await assignedHealthProtocolRepository.findOne({
-      healthprotocol_description: String(healthprotocol_description),
+      healthprotocol_id: String(healthprotocol_id),
       disease_name: String(disease_name)
     })
 
     if(!associationExists) {
       return response.status(404).json({
-        error: "Association does not exist"
+        error: "Protocolo de saúde não associado à essa doença"
       })
     }
 
@@ -176,17 +141,17 @@ class AssignedHealthProtocolController {
       await assignedHealthProtocolRepository.createQueryBuilder()
         .delete()
         .from(AssignedHealthProtocol)
-        .where("healthprotocol_description = :healthprotocol_description and disease_name = :disease_name", {
-          healthprotocol_description: healthprotocol_description, 
+        .where("healthprotocol_id = :healthprotocol_id and disease_name = :disease_name", {
+          healthprotocol_id: healthprotocol_id, 
           disease_name: disease_name
         })
         .execute()
       return response.status(200).json({
-        message: "Association deleted!"
+        success: "Associação deletada com sucesso"
       })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na deleção da associação"
       })
     }
   }

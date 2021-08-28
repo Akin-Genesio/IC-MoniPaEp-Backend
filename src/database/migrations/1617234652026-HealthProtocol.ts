@@ -7,9 +7,14 @@ export class HealthProtocol1617234652026 implements MigrationInterface {
         name: "healthProtocols",
         columns: [
           {
+            name: "id",
+            type: "uuid",
+            isPrimary: true
+          },
+          {
             name: "description",
             type: "varchar",
-            isPrimary: true
+            isNullable: false
           }
         ],
       })

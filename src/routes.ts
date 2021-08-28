@@ -94,12 +94,11 @@ router.get("/vaccine/:vaccine_id", jwt.authMiddleware, vaccineController.getOne)
 router.put("/vaccine/:vaccine_id", jwt.authMiddleware, vaccineController.alterOne)//geral autenticado*
 router.delete("/vaccine/:vaccine_id", jwt.authMiddleware, vaccineController.deleteOne)//geral autenticado*
 
-//Health Protocol Routes
+//Health Protocol Routes - Ok
 router.post("/healthprotocol", jwt.authMiddleware, jwt.usmUserMiddleware, healthProtocolController.create)//usuarios do USM*
 router.get("/healthprotocol", jwt.authMiddleware, healthProtocolController.list)//geral autenticado
-router.get("/healthprotocol/:description", jwt.authMiddleware, healthProtocolController.getOne)//geral autenticado
-router.put("/healthprotocol/:description", jwt.authMiddleware, jwt.usmUserMiddleware, healthProtocolController.alterOne)//funcionarios USM*
-router.delete("/healthprotocol/:description", jwt.authMiddleware, jwt.usmUserMiddleware, healthProtocolController.deleteOne)//funcionarios USM*
+router.put("/healthprotocol/:id", jwt.authMiddleware, jwt.usmUserMiddleware, healthProtocolController.alterOne)//funcionarios USM*
+router.delete("/healthprotocol/:id", jwt.authMiddleware, jwt.usmUserMiddleware, healthProtocolController.deleteOne)//funcionarios USM*
 
 //Symptom Routes
 router.post("/symptom", jwt.authMiddleware, jwt.localAdminMiddleware, symptomController.create)//adm e adm locais
@@ -119,16 +118,16 @@ router.get("/symptomoccurrence", jwt.authMiddleware, symptomOccurrenceController
 router.put("/symptomoccurrence/:symptom_occurrence_id", jwt.authMiddleware, symptomOccurrenceController.alterOne)//geral autenticado*
 router.delete("/symptomoccurrence/:symptom_occurrence_id", jwt.authMiddleware, symptomOccurrenceController.deleteOne)//geral autenticado*
 
-//AssignedHealthProtocol Routes
+//AssignedHealthProtocol Routes - Okk
 router.post("/assignedhealthprotocol", jwt.authMiddleware, jwt.systemUserMiddleware, assignedHealthProtocolController.create)//usuario do sistema autenticado
 router.get("/assignedhealthprotocol", jwt.authMiddleware, assignedHealthProtocolController.list)//geral autenticado
-router.delete("/assignedhealthprotocol/:disease_name/:healthprotocol_description", jwt.authMiddleware, jwt.systemUserMiddleware, assignedHealthProtocolController.deleteOne)//usuario do sistema autenticado
+router.delete("/assignedhealthprotocol/:disease_name/:healthprotocol_id", jwt.authMiddleware, jwt.systemUserMiddleware, assignedHealthProtocolController.deleteOne)//usuario do sistema autenticado
 
-//PatientMovementHistory Routes
+//PatientMovementHistory Routes - Ok
 router.post("/patientmovementhistory", jwt.authMiddleware, patientMovementHistoryController.create) //geral autenticado*
 router.get("/patientmovementhistory", jwt.authMiddleware, patientMovementHistoryController.list) //geral autenticado
-router.put("/patientmovementhistory/:disease_occurrence_id/:description", jwt.authMiddleware, patientMovementHistoryController.alterOne) //geral autenticado*
-router.delete("/patientmovementhistory/:disease_occurrence_id/:description", jwt.authMiddleware, patientMovementHistoryController.deleteOne) //geral autenticado*
+router.put("/patientmovementhistory/:id", jwt.authMiddleware, patientMovementHistoryController.alterOne) //geral autenticado*
+router.delete("/patientmovementhistory/:id", jwt.authMiddleware, patientMovementHistoryController.deleteOne) //geral autenticado*
 
 //FAQ Routes - Ok
 router.post("/faq", jwt.authMiddleware, jwt.localAdminMiddleware, faqController.create)//adm e adm local
