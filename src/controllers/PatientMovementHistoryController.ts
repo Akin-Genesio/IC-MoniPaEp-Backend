@@ -9,24 +9,27 @@ class PatientMovementHistoryController {
     const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
     const patientMovementRepository = getCustomRepository(PatientMovementHistoryRepository)
 
-    const IsValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
+    const isValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
       id: body.disease_occurrence_id
     })
 
-    if (!IsValidDiseaseOccurrence) {
+    if (!isValidDiseaseOccurrence) {
       return response.status(404).json({
-        error: "Disease occurrence id is not valid!"
+        error: "Ocorrência de doença não encontrada"
       })
     }
 
     try {
-      const patientMovementHistory = patientMovementRepository.create(body)
-      await patientMovementRepository.save(patientMovementHistory)
+      const patientMovementHistoryBody = patientMovementRepository.create(body)
+      const patientMovementHistory = await patientMovementRepository.save(patientMovementHistoryBody)
   
-      return response.status(201).json(patientMovementHistory)
+      return response.status(201).json({
+        success: "Histórico de movimentação registrado com sucesso",
+        patientMovementHistory
+      })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro no registro do histórico de movimentação"
       })
     }
   }

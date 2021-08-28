@@ -14,7 +14,7 @@ class USMController{
 
     if(usmAlreadyExists){
       return response.status(400).json({
-        error: "USM already exists"
+        error: "Unidade de saúde já registrada"
       })
     }
 
@@ -22,52 +22,61 @@ class USMController{
       const usm = usmRepository.create(body)
       await usmRepository.save(usm)
       
-      return response.status(201).json(usm)
+      return response.status(201).json({
+        success: "Unidade de saúde cadastrada com sucesso"
+      })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro no cadastro da unidade de saúde"
       })
     }
   }
 
   async list(request: Request, response: Response){
-    const usmRepository = getCustomRepository(USMRepository)
-    const usmList = await usmRepository.find()
-
-    return response.json(usmList)
-  }
-
-  async getOne(request: Request, response: Response){
-    const {usm_name} = request.params
+    const { name } = request.query
 
     const usmRepository = getCustomRepository(USMRepository)
 
-    const usm = await usmRepository.findOne({
-      name: usm_name
-    })
-    
-    if(!usm){
-      return response.status(404).json({
-        error: "USM not found"
-      })
+    let filters = {}
+
+    if(name) {
+      filters = { ...filters, name: String(name) }
     }
 
-    return response.status(302).json(usm)
+    const hasQueryParams = Object.keys(filters).length
+
+    if(!hasQueryParams) {
+      const usmList = await usmRepository.find()
+
+      return response.status(200).json(usmList)
+    } else {
+      const isValidUsm = await usmRepository.findOne({
+        name: String(name)
+      })
+      
+      if(!isValidUsm){
+        return response.status(404).json({
+          error: "Unidade de saúde não encontrada"
+        })
+      }
+
+      const usmList = await usmRepository.find(filters)
+
+      return response.status(200).json(usmList)
+    }
   }
 
   async alterOne(request: Request, response: Response){
     const body = request.body
-    const {usm_name} = request.params
+    const { name } = request.params
 
     const usmRepository = getCustomRepository(USMRepository)
 
-    const usm = await usmRepository.findOne({
-      name: usm_name
-    })
+    const isValidUsm = await usmRepository.findOne({ name })
     
-    if(!usm){
+    if(!isValidUsm){
       return response.status(404).json({
-        error: "USM not found"
+        error: "Unidade de saúde não encontrada"
       })
     }
 
@@ -75,29 +84,28 @@ class USMController{
       await usmRepository.createQueryBuilder()
         .update(USM)
         .set(body)
-        .where("name = :name", { name: usm_name })
+        .where("name = :name", { name })
         .execute();
+      return response.status(200).json({
+        success: "Unidade de saúde alterada com sucesso",
+      })
     } catch (error) {
       return response.status(403).json({
-        error: "USM is already registered"
+        error: "Erro na atualização da unidade de saúde"
       })
     }
-    
-    return response.status(200).json(body)
   }
 
   async deleteOne(request: Request, response: Response){
-    const {usm_name} = request.params
+    const { name } = request.params
 
     const usmRepository = getCustomRepository(USMRepository)
 
-    const usm = await usmRepository.findOne({
-      name: usm_name
-    })
+    const isValidUsm = await usmRepository.findOne({ name })
     
-    if(!usm){
+    if(!isValidUsm){
       return response.status(404).json({
-        error: "USM not found"
+        error: "Unidade de saúde não encontrada"
       })
     }
     
@@ -105,17 +113,17 @@ class USMController{
       await usmRepository.createQueryBuilder()
         .delete()
         .from(USM)
-        .where("name = :name", { name: usm_name })
+        .where("name = :name", { name })
         .execute();
       return response.status(200).json({
-        message: "USM deleted"
+        success: "Unidade de saúde deletada com sucesso"
       })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na deleção da unidade de saúde"
       })
     }
   }
 }
 
-export {USMController}
+export { USMController }

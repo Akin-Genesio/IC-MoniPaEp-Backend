@@ -7,15 +7,24 @@ export class PatientMovementHistory1617648240666 implements MigrationInterface {
         name: "patient_movement_history",
         columns: [
           {
-            name: "description",
-            type: "varchar",
+            name: "id",
+            type: "uuid",
             isPrimary: true
           },
           {
             name: "disease_occurrence_id",
             type: "uuid",
-            isPrimary: true
-          }
+            isNullable: false,
+          },
+          {
+            name: "description",
+            type: "varchar",
+            isNullable: false,
+          },
+          {
+            name: "date",
+            type: "date"
+          },
         ],
         foreignKeys: [
           {

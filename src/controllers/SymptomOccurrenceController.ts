@@ -101,19 +101,19 @@ class SymptomOccurrenceController {
     let filters = {}
 
     if(id) {
-      filters = {...filters, id: String(id)}
+      filters = { ...filters, id: String(id) }
     }
 
     if(patient_id) {
-      filters = {...filters, patient_id: String(patient_id)}
+      filters = { ...filters, patient_id: String(patient_id) }
     }
 
     if(symptom_name) {
-      filters = {...filters, symptom_name: String(symptom_name)}
+      filters = { ...filters, symptom_name: String(symptom_name) }
     }
 
     if(disease_occurrence_id) {
-      filters = {...filters, disease_occurrence_id: String(disease_occurrence_id)}
+      filters = { ...filters, disease_occurrence_id: String(disease_occurrence_id) }
     }
 
     const hasQueryParams = Object.keys(filters).length
@@ -161,7 +161,7 @@ class SymptomOccurrenceController {
           })
         }
       }
-      
+
       const occurrencesList = await symptomOccurrenceRepository.find(filters)
 
       return response.status(200).json(occurrencesList)

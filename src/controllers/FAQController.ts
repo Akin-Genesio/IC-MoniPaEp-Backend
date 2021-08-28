@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { getCustomRepository } from 'typeorm'
 import { FAQ } from "../models";
 import { FAQRepository } from "../repositories/FAQRepository";
+
 class FAQController{
   async create(request: Request, response: Response){
     const body = request.body
@@ -13,59 +14,87 @@ class FAQController{
     })
 
     if(faqAlreadyExists){
-      return response.status(406).json({
-        error: "Question has already been registered!"
+      return response.status(403).json({
+        error: "Essa questão já foi registrada"
       })
     }
 
     try {
-      const faq = faqRepository.create(body)
-      await faqRepository.save(faq)
+      const faqBody = faqRepository.create(body)
+      const faq: any = await faqRepository.save(faqBody)
   
-      return response.status(201).json(faq)
+      return response.status(201).json({
+        success: "Questão registrada com sucesso",
+        faq
+      })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro no registro da questão"
       })
     }
   }
 
   async list(request: Request, response: Response) {
-    const {question} = request.query
+    const { question, id } = request.query
 
     const faqRepository = getCustomRepository(FAQRepository)
+    let filters = {}
+
+    if(id) {
+      filters = { ...filters, id: String(id) }
+    }
 
     if(question) {
-      const questionExists = await faqRepository.findOne({
-        question: String(question)
-      })
+      filters = { ...filters, question: String(question) }
+    }
 
-      if(!questionExists) {
-        return response.status(404).json({
-          error: "Question not found"
-        })
-      }
+    const hasQueryParams = Object.keys(filters).length
 
-      return response.status(200).json(questionExists)
-    } else {
+    if(!hasQueryParams) {
       const questionsList = await faqRepository.find()
+
+      return response.status(200).json(questionsList)
+    } else {
+      if(id) {
+        const questionExists = await faqRepository.findOne({
+          id: String(id)
+        })
+  
+        if(!questionExists) {
+          return response.status(404).json({
+            error: "Questão não encontrada"
+          })
+        }
+      }
+      
+      if(question) {
+        const questionExists = await faqRepository.findOne({
+          question: String(question)
+        })
+  
+        if(!questionExists) {
+          return response.status(404).json({
+            error: "Questão não encontrada"
+          })
+        }
+      }
+      const questionsList = await faqRepository.find(filters)
+  
       return response.status(200).json(questionsList)
     }
   }
 
   async alterOne(request: Request, response: Response) {
     const body = request.body
-    const {question} = request.params
+    const { id } = request.params
 
     const faqRepository = getCustomRepository(FAQRepository)
 
-    const questionExists = await faqRepository.findOne({
-      question: question
-    })
+    const questionExists = await faqRepository.findOne({ id })
 
     if(!questionExists) {
       return response.status(404).json({
-        error: "Question not found"
+        error: "Questão não encontrada"
       })
     }
 
@@ -73,28 +102,28 @@ class FAQController{
       await faqRepository.createQueryBuilder()
         .update(FAQ)
         .set(body)
-        .where("question = :question", {question: question})
+        .where("id = :id", { id })
         .execute()
-      return response.status(200).json(body)
+      return response.status(200).json({
+        success: "Questão atualizada com sucesso",
+      })
     } catch (error) {
       return response.status(403).json({
-        error: "Question already registered"
+        error: "Erro na alteração da questão"
       })
     }
   }
 
   async deleteOne(request: Request, response: Response) {
-    const {question} = request.params
+    const { id } = request.params
 
     const faqRepository = getCustomRepository(FAQRepository)
 
-    const questionExists = await faqRepository.findOne({
-      question: question
-    })
+    const questionExists = await faqRepository.findOne({ id })
 
     if(!questionExists) {
       return response.status(404).json({
-        error: "Question not found"
+        error: "Questão não encontrada"
       })
     }
     
@@ -102,17 +131,17 @@ class FAQController{
       await faqRepository.createQueryBuilder()
         .delete()
         .from(FAQ)
-        .where("question = :question", {question: question})
+        .where("id = :id", { id })
         .execute()
       return response.status(200).json({
-        message: "Question has been deleted"
+        success: "Questão deletada com sucesso"
       })
     } catch (error) {
       return response.status(403).json({
-        error: error
+        error: "Erro na deleção da questão"
       })
     }
   }
 }
 
-export {FAQController};
+export { FAQController };

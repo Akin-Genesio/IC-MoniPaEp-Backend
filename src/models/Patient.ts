@@ -1,5 +1,5 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryColumn } from "typeorm";
-import {v4 as uuid} from 'uuid'
+import { v4 as uuid } from 'uuid'
 import bcrypt from 'bcrypt'
 
 @Entity("patients")

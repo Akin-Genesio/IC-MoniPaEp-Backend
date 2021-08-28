@@ -7,9 +7,14 @@ export class FAQ1616612952311 implements MigrationInterface {
         name: "FAQ",
         columns: [
           {
+            name: "id",
+            type: "uuid",
+            isPrimary: true
+          },
+          {
             name: "question",
             type: "varchar",
-            isPrimary: true
+            isUnique: true
           },
           {
             name: "answer",
