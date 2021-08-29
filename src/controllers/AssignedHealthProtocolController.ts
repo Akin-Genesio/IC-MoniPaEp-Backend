@@ -97,7 +97,7 @@ class AssignedHealthProtocolController {
 
     const associationList = await assignedHealthProtocolRepository.find({
       where: filters,
-      select: ['disease_name'],
+      select: ["disease_name"],
       relations: ["healthprotocol"],
     })
     // const associationList = await assignedHealthProtocolRepository.createQueryBuilder()

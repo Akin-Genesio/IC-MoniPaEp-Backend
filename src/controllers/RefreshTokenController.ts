@@ -19,7 +19,7 @@ class RefreshTokenController {
 
     if(!refreshTokenExists) {
       return response.status(404).json({
-        error: "Refresh token not valid"
+        error: "Refresh token não encontrado"
       })
     }
 
@@ -34,12 +34,13 @@ class RefreshTokenController {
           .execute();
       } catch (error) {
         return response.status(404).json({
-          error: "Refresh token deleting error"
+          error: "Erro na deleção do refresh token"
         })
       }
 
       return response.status(404).json({
-        error: "Refresh token expired"
+        error: "Refresh token expirado",
+        code: "refresh.token.expired"
       })
     } 
 
@@ -71,7 +72,7 @@ class RefreshTokenController {
       } else if(isSystemUserId) {
         const token = jwt.sign({
           id: isSystemUserId,
-          type: 'systemUser'
+          type: 'system_user'
         })
 
         const refreshTokenBody = refreshTokenRepository.create({
@@ -81,16 +82,16 @@ class RefreshTokenController {
 
         const refreshToken = await refreshTokenRepository.save(refreshTokenBody)
         
-        return response.status(200).json({ isSystemUserId, token, refreshToken })
+        return response.status(200).json({ token, refreshToken })
 
       } else {
         return response.status(403).json({
-          error: "Refresh token generation error"
+          error: "Erro na geração do refresh token"
         })
       }
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na criação do refresh token"
       })
     }
   }

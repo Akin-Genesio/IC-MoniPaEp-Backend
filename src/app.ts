@@ -13,7 +13,7 @@ app.use(express.json())
 app.use(router);
 
 //Errors  treatment
-app.use((err: Error, request: Request, response: Response, _next: NextFunction) =>{
+app.use((err: Error, request: Request, response: Response, _next: NextFunction) => {
   if(err instanceof AppError){
     return response.status(err.statusCode).json({
       message: err.message,

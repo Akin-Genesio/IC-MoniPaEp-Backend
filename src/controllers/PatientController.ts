@@ -48,10 +48,15 @@ class PatientController{
       })
 
       patient.password = undefined
-      return response.status(201).json({ patient, token, refreshToken })
+      return response.status(201).json({ 
+        success: "Paciente criado com sucesso",
+        patient, 
+        token, 
+        refreshToken 
+      })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na criação do paciente"
       })
     }
   }
@@ -60,6 +65,19 @@ class PatientController{
     const { email, password } = request.body
 
     const patientsRepository = getCustomRepository(PatientsRepository)
+    
+    if(!password) {
+      return response.status(401).json({
+        error: "Senha não informada"
+      })
+    }
+
+    if(!email) {
+      return response.status(401).json({
+        error: "Email não informada"
+      })
+    }
+    
     const patientExists: any = await patientsRepository.findOne({
       where: { email }, 
       select: ['id', 'email', 'password']
@@ -67,95 +85,109 @@ class PatientController{
 
     if (!patientExists) {
       return response.status(401).json({
-        error: "Patient does not exist"
+        error: "Email e/ou senha inválidos"
       })
     }
 
+    
     const validPassword = await bcrypt.compare(password, patientExists.password)
 
     if(validPassword) {
-      const patientId = patientExists.id
+      try {
+        const patientId = patientExists.id
 
-      const token = jwt.sign({
-        id: patientId,
-        type: 'patient'
-      })
+        const token = jwt.sign({
+          id: patientId,
+          type: 'patient'
+        })
+  
+        const refreshTokenRepository = getCustomRepository(RefreshTokenRepository)
+  
+        const refreshTokenExists = await refreshTokenRepository.findOne({
+          patientId
+        })
+        
+        if(refreshTokenExists) {
+          await refreshTokenRepository.createQueryBuilder()
+          .delete()
+          .from(RefreshToken)
+          .where("patientId = :id", { id: patientId })
+          .execute()
+        }
+  
+        const refreshTokenBody = refreshTokenRepository.create({
+          patientId,
+          expiresIn: refreshTokenExpiresIn()
+        })
+  
+        const refreshToken = await refreshTokenRepository.save(refreshTokenBody)
 
-      const refreshTokenRepository = getCustomRepository(RefreshTokenRepository)
-
-      const refreshTokenExists = await refreshTokenRepository.findOne({
-        patientId
-      })
-      
-      if(refreshTokenExists) {
-        await refreshTokenRepository.createQueryBuilder()
-        .delete()
-        .from(RefreshToken)
-        .where("patientId = :id", { id: patientId })
-        .execute()
+        refreshToken.patientId = undefined
+  
+        return response.status(200).json({ patientId, token, refreshToken })
+      } catch (error) {
+        return response.status(400).json({
+          error: "Erro no login"
+        })
       }
-
-      const refreshTokenBody = refreshTokenRepository.create({
-        patientId,
-        expiresIn: refreshTokenExpiresIn()
-      })
-
-      const refreshToken = await refreshTokenRepository.save(refreshTokenBody)
-
-      return response.status(200).json({ patientId, token, refreshToken })
     } else {
-      return response.status(400).json({
-        error: "Invalid password"
+      return response.status(401).json({
+        error: "Email e/ou senha inválidos"
       })
     }
   }
 
   async list(request: Request, response: Response){
+    const { id, status, active } = request.query
+    let filters = {}
+
     const patientsRepository = getCustomRepository(PatientsRepository)
-    const patientsList = await patientsRepository.find()
+
+    if(id) {
+      filters = { ...filters, id: String(id) }
+
+      const patient = await patientsRepository.findOne({
+        id: String(id)
+      })
+    
+      if(!patient){
+        return response.status(404).json({
+          error: "Paciente não encontrado"
+        })
+      }
+    }
+
+    if(status) {
+      filters = { ...filters, status: String(status) }
+    }
+
+    if(active) {     
+      if(active === "true") {
+        filters = { ...filters, activeAccount: true }
+      } else {
+        filters = { ...filters, activeAccount: false }
+      }
+    }   
+    const patientsList = await patientsRepository.find(filters)
 
     return response.json(patientsList)
   } 
 
-  async listActiveAccounts(request: Request, response: Response){
-    const patientsRepository = getCustomRepository(PatientsRepository)
-    const patientsList = await patientsRepository.find(
-      {activeAccount: true}
-    )
+  async getOneWithToken(request, response: Response) {
+    const { id, type } = request.tokenPayload
 
-    return response.json(patientsList)
-  }
-
-
-  async getOne(request: Request, response: Response){
-    const {patient_id} = request.params
-
-    const patientsRepository = getCustomRepository(PatientsRepository)
-
-    const patient = await patientsRepository.findOne({
-      id: patient_id
-    })
-    
-    if(!patient){
-      return response.status(404).json({
-        error: "Patient not found"
+    if(type !== 'patient') {
+      return response.status(401).json({
+        error: "Token inválido para essa requisição"
       })
     }
-
-    return response.status(302).json(patient)
-  }
-
-  async getOneWithToken(request, response: Response) {
-    const id = request.tokenPayload.id
     
     const patientsRepository = getCustomRepository(PatientsRepository)
-    const user = await patientsRepository.findOne({
-      id
-    })
+    const user = await patientsRepository.findOne({ id })
 
     if(!user) {
       return response.status(401).json({
-        error: "User invalid"
+        error: "Paciente inválido"
       })
     }
     
@@ -164,17 +196,15 @@ class PatientController{
 
   async alterOne(request: Request, response: Response){
     const body = request.body
-    const {patient_id} = request.params
+    const { id } = request.params
 
     const patientsRepository = getCustomRepository(PatientsRepository)
 
-    const patient = await patientsRepository.findOne({
-      id: patient_id
-    })
+    const patient = await patientsRepository.findOne({ id })
       
     if(!patient){
       return response.status(404).json({
-        error: "Patient not found"
+        error: "Paciente não encontrado"
       })
     }
 
@@ -187,30 +217,28 @@ class PatientController{
       await patientsRepository.createQueryBuilder()
         .update(Patient)
         .set(body)
-        .where("id = :id", { id: patient_id })
+        .where("id = :id", { id })
         .execute();
-      body.password = undefined
-      return response.status(200).json(body)
+      return response.status(200).json({
+        success: "Paciente atualizado com sucesso"
+      })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na atualização do paciente"
       })
     }
-    
   }
 
   async deleteOne(request: Request, response: Response){
-    const {patient_id} = request.params
+    const { id } = request.params
 
     const patientsRepository = getCustomRepository(PatientsRepository)
 
-    const patient = await patientsRepository.findOne({
-      id: patient_id
-    })
+    const patient = await patientsRepository.findOne({ id })
     
     if(!patient){
       return response.status(404).json({
-        error: "Patient not found"
+        error: "Paciente não encontrado"
       })
     }
 
@@ -218,54 +246,46 @@ class PatientController{
       await patientsRepository.createQueryBuilder()
         .delete()
         .from(Patient)
-        .where("id = :id", { id: patient_id })
+        .where("id = :id", { id })
         .execute();
       return response.status(200).json({
-        message: "Patient deleted"
+        success: "Paciente deletado com sucesso"
       })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na deleção do paciente"
       })
     }
   }
 
   async deactivateAccount(request: Request, response: Response){
-    const body = request.body
-    const { patient_id } = request.params
+    const { id } = request.params
 
     const patientsRepository = getCustomRepository(PatientsRepository)
 
-    const patient = await patientsRepository.findOne({
-      id: patient_id
-    })
+    const patient = await patientsRepository.findOne({ id })
     
     if(!patient){
       return response.status(404).json({
-        error: "Patient not found"
+        error: "Paciente não encontrado"
       })
-    }
-
-    if(body.password){
-      const hash = await bcrypt.hash(body.password, 10)
-      body.password = hash
     }
 
     try {
       await patientsRepository.createQueryBuilder()
         .update(Patient)
         .set({ activeAccount: false })
-        .where("id = :id", { id: patient_id })
-        .execute();
+        .where("id = :id", { id })
+        .execute()
+      return response.status(200).json({
+        success: "Conta desativada com sucesso"
+      })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na desativação da conta"
       })
     }
-
-    return response.status(200).json("deactivated account")
   }
-    
 }
 
 export { PatientController }

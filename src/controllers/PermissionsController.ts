@@ -16,7 +16,7 @@ class PermissionsController {
 
     if(!userExists) {
       return response.status(406).json({
-        error: "User does not exist"
+        error: "Usuário não encontrado"
       })
     }
 
@@ -25,60 +25,71 @@ class PermissionsController {
     })
 
     if(permissionExists) {
-      return response.status(406).json({
-        error: "Permission has already been assigned"
+      return response.status(403).json({
+        error: "Permissões já foram atribuídas à esse usuário"
       })
     }
 
     try {
+      body.localAdm = false
+      body.generalAdm = false
+      body.authorized = false
       const permissions = permissionsRepository.create(body)
       await permissionsRepository.save(permissions)
 
-      return response.status(201).json(permissions)
+      return response.status(201).json({
+        success: "Permissões do usuário criadas com sucesso"
+      })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na criação das permissões do usuário"
       })
     }
   }
 
   async list (request: Request, response: Response) {
+    const { id } = request.query
+
+    let filters = {}
+
     const permissionsRepository = getCustomRepository(PermissionsRepository)
-    const permissionsList = await permissionsRepository.find()
+    
+    if(id) {
+      filters = { ...filters, userId: String(id) }
+
+      const userIsValid = await permissionsRepository.findOne({
+        userId: String(id)
+      })
+
+      if(!userIsValid) {
+        return response.status(403).json({
+          error: "Usuário não encontrado"
+        })
+      }
+    }
+
+    const permissionsList = await permissionsRepository.find({
+      where: filters,
+      select: ["authorized", "localAdm", "generalAdm"],
+      relations: ["systemUser"]
+    })
 
     return response.status(200).json(permissionsList)
   }
 
-  async getOne (request: Request, response: Response) {
-    const { user_id } = request.params
-    
-    const permissionsRepository = getCustomRepository(PermissionsRepository)
-    const userExists = await permissionsRepository.findOne({
-      userId: user_id
-    })
-
-    if(!userExists) {
-      return response.status(406).json({
-        error: "User does not exist"
-      })
-    }
-
-    return response.status(200).json(userExists)
-  }
-
   async alterOne(request: Request, response: Response){
     const body = request.body
-    const { user_id } = request.params
+    const { id } = request.params
 
     const permissionsRepository = getCustomRepository(PermissionsRepository)
 
     const userExists = await permissionsRepository.findOne({
-      userId: user_id
+      userId: id
     })
     
     if(!userExists){
       return response.status(404).json({
-        error: "User not found"
+        error: "Usuário não encontrado"
       })
     }
 
@@ -86,30 +97,30 @@ class PermissionsController {
       await permissionsRepository.createQueryBuilder()
         .update(Permissions)
         .set(body)
-        .where("userId = :id", { id: user_id })
+        .where("userId = :id", { id })
         .execute();
       return response.status(200).json({
-        message: "Permissions updated!"
+        success: "Permissões atualizadas com sucesso"
       })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na atualização de permissões"
       })
     }
   }
 
   async deleteOne(request: Request, response: Response){
-    const { user_id } = request.params
+    const { id } = request.params
 
     const permissionsRepository = getCustomRepository(PermissionsRepository)
 
     const userExists = await permissionsRepository.findOne({
-      userId: user_id
+      userId: id
     })
     
     if(!userExists){
       return response.status(404).json({
-        error: "User not found"
+        error: "Usuário não encontrado"
       })
     }
 
@@ -117,14 +128,14 @@ class PermissionsController {
       await permissionsRepository.createQueryBuilder()
         .delete()
         .from(Permissions)
-        .where("userId = :id", { id: user_id })
+        .where("userId = :id", { id })
         .execute();
       return response.status(200).json({
-        message: "Permissions excluded!"
+        message: "Permissões deletadas com sucesso"
       })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na deleção das permissões"
       })
     }
   }

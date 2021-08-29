@@ -23,7 +23,7 @@ class SystemUserController {
 
     if (userAlreadyExists) {
       return response.status(400).json({
-        error: "User already registered with this email or CPF"
+        error: "Email/CPF já cadastrado"
       })
     }
 
@@ -41,10 +41,12 @@ class SystemUserController {
       await permissionRepository.save(permissions)
     
       userSaved.password = undefined      
-      return response.status(201).json({ user: userSaved })
+      return response.status(201).json({
+        success: "Usuário criado com sucesso"
+      })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na criação do usuário"
       })
     }
   }
@@ -56,7 +58,7 @@ class SystemUserController {
       [, hash] = request.headers.authorization.split(' ')
     } catch (error) {
       return response.status(401).json({
-        error: "Credentials required"
+        error: "Credenciais necessárias"
       })
     }
 
@@ -70,7 +72,7 @@ class SystemUserController {
 
     if (!userExists) {
       return response.status(401).json({
-        error: "User does not exist"
+        error: "Usuário não encontrado"
       })
     }
 
@@ -79,7 +81,7 @@ class SystemUserController {
 
     if(!validPassword) {
       return response.status(400).json({
-        error: "Invalid password"
+        error: "Email e/ou senha inválidos"
       })
     }
 
@@ -91,13 +93,13 @@ class SystemUserController {
 
       if(!userPermissions) {
         return response.status(400).json({
-          error: "User does not have permissions"
+          error: "Usuário sem permissões cadastradas"
         })
       }
 
       if(!userPermissions.authorized) {
         return response.status(400).json({
-          error: "User not authorized"
+          error: "Usuário não autorizado"
         })
       }
       
@@ -123,82 +125,81 @@ class SystemUserController {
 
       const token = jwt.sign({
         id: systemUserId,
-        type: 'systemUser'
+        type: 'system_user'
       })
 
       return response.status(200).json({
-        user: {
-          name: userExists.name,
-          email: userExists.email,
-          department: userExists.department,
-        },
         token,
         refreshToken,
       })
 
     } catch (error) {
       return response.status(400).json({
-        error: error.message
+        error: "Erro no login"
       })
     }
-
   }
 
   async list(request: Request, response: Response) {
+    const { id, department } = request.query
+    let filters = {}
+    
     const systemUserRepository = getCustomRepository(SystemUserRepository)
-    const users = await systemUserRepository.find()
+
+    if(id) {
+      filters = { ...filters, id: String(id) }
+
+      const user = await systemUserRepository.findOne({
+        id: String(id)
+      })
+    
+      if(!user){
+        return response.status(404).json({
+          error: "Usuário não encontrado"
+        })
+      }
+    }
+
+    if(department) {
+      filters = { ...filters, department: String(department) }
+    }
+
+    const users = await systemUserRepository.find(filters)
 
     return response.status(200).json(users)
   }
 
-  async getOne(request: Request, response: Response) {
-    const {user_id} = request.params
-    
-    const systemUserRepository = getCustomRepository(SystemUserRepository)
-    const user = await systemUserRepository.findOne({
-      id: user_id
-    })
-
-    if(!user) {
-      return response.status(401).json({
-        error: "User invalid"
-      })
-    }
-
-    return response.status(200).json(user)
-  }
-
   async getOneWithToken(request, response: Response) {
-    const id = request.tokenPayload.id
+    const { id, type } = request.tokenPayload
+
+    if(type !== 'system_user') {
+      return response.status(401).json({
+        error: "Token inválido para essa requisição"
+      })
+    }
     
     const systemUserRepository = getCustomRepository(SystemUserRepository)
-    const user = await systemUserRepository.findOne({
-      id: id
-    })
+    const user = await systemUserRepository.findOne({ id })
 
     if(!user) {
       return response.status(401).json({
-        error: "User invalid"
+        error: "Usuário inválido"
       })
     }
-    user.CPF = undefined
-    user.createdAt = undefined
 
     return response.status(200).json(user)
   }
 
   async alterOne(request: Request, response: Response) {
     const body = request.body
-    const {user_id} = request.params
+    const { id } = request.params
 
     const systemUserRepository = getCustomRepository(SystemUserRepository)
-    const userExists = await systemUserRepository.findOne({
-      id: user_id
-    })
+    const userExists = await systemUserRepository.findOne({ id })
 
     if(!userExists){
       return response.status(401).json({
-        error: "User invalid"
+        error: "Usuário inválido"
       })
     }
     
@@ -211,28 +212,27 @@ class SystemUserController {
       await systemUserRepository.createQueryBuilder()
         .update(SystemUser)
         .set(body)
-        .where("id = :id", { id: user_id })
+        .where("id = :id", { id })
         .execute()
-      body.password = undefined
-      return response.status(200).json(body)
+      return response.status(200).json({
+        success: "Usuário atualizado com sucesso"
+      })
     } catch (error) {
       return response.status(403).json({
-        error: "This email or CPF has already been registered"
+        error: "Erro na atualização do usuário"
       })
     }
   }
 
   async deleteOne(request: Request, response: Response) {
-    const {user_id} = request.params
+    const { id } = request.params
 
     const systemUserRepository = getCustomRepository(SystemUserRepository)
-    const userExists = await systemUserRepository.findOne({
-      id: user_id
-    })
+    const userExists = await systemUserRepository.findOne({ id })
 
     if(!userExists){
       return response.status(401).json({
-        error: "User invalid"
+        error: "Usuário inválido"
       })
     }
 
@@ -240,14 +240,14 @@ class SystemUserController {
       await systemUserRepository.createQueryBuilder()
         .delete()
         .from(SystemUser)
-        .where("id = :id", { id: user_id })
+        .where("id = :id", { id })
         .execute()
       return response.status(200).json({
-        message: "System user removed"
+        success: "Usuário deletado com sucesso"
       })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na deleção do usuário"
       })
     }
   }
