@@ -42,46 +42,34 @@ class FAQSuggestionsController {
 
     if(id) {
       filters = { ...filters, id: String(id) }
+
+      const questionExists = await faqSuggestionsRepository.findOne({
+        id: String(id)
+      })
+
+      if(!questionExists) {
+        return response.status(404).json({
+          error: "Sugestão de questão não encontrada"
+        })
+      }
     }
 
     if(question) {
       filters = { ...filters, question: String(question) }
-    }
 
-    const hasQueryParams = Object.keys(filters).length
+      const questionExists = await faqSuggestionsRepository.findOne({
+        question: String(question)
+      })
 
-    if(!hasQueryParams) {
-      const questionsList = await faqSuggestionsRepository.find()
-
-      return response.status(200).json(questionsList)
-    } else {
-      if(question) {
-        const questionExists = await faqSuggestionsRepository.findOne({
-          question: String(question)
+      if(!questionExists) {
+        return response.status(404).json({
+          error: "Sugestão de questão não encontrada"
         })
-  
-        if(!questionExists) {
-          return response.status(404).json({
-            error: "Sugestão de questão não encontrada"
-          })
-        }
-      } 
-
-      if(id) {
-        const questionExists = await faqSuggestionsRepository.findOne({
-          id: String(id)
-        })
-  
-        if(!questionExists) {
-          return response.status(404).json({
-            error: "Sugestão de questão não encontrada"
-          })
-        }
-      } 
-      const questionsList = await faqSuggestionsRepository.find(filters)
-
-      return response.status(200).json(questionsList)
+      }
     }
+    const questionsList = await faqSuggestionsRepository.find(filters)
+
+    return response.status(200).json(questionsList)
   }
 
   async deleteOne(request: Request, response: Response) {

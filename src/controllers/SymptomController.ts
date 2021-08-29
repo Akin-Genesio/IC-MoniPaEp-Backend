@@ -14,8 +14,8 @@ class SymptomController {
     })
 
     if(symptomAlreadyExists) {
-      return response.status(406).json({
-        error: "Symptom has already been registered"
+      return response.status(403).json({
+        error: "Sintoma já registrado"
       })
     }
 
@@ -23,53 +23,49 @@ class SymptomController {
       const symptom = symptomRepository.create(body)
       await symptomRepository.save(symptom)
   
-      return response.status(201).json(symptom)
+      return response.status(201).json({
+        success: "Sintoma registrado com sucesso"
+      })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na criação do sintoma"
       })
     }
   }
 
   async list(request: Request, response: Response){
-    const {symptom_name} = request.query
+    const { symptom } = request.query
     
     const symptomRepository = getCustomRepository(SymptomRepository)
     
-    if(!symptom_name) {
+    if(!symptom) {
       const symptomsList = await symptomRepository.find()
       return response.status(200).json(symptomsList)
     } else {
-      const symptom = await symptomRepository.findOne({
-        symptom: String(symptom_name)
+      const symptomItem = await symptomRepository.findOne({
+        symptom: String(symptom)
       })
 
-      if(!symptom){
+      if(!symptomItem){
         return response.status(404).json({
-          error: "Symptom not found"
+          error: "Sintoma não encontrado"
         })
       }
 
-      const symptomsList = await symptomRepository.find({
-        symptom: String(symptom_name)
-      })
-
-      return response.status(200).json(symptomsList)
+      return response.status(200).json(symptomItem)
     }
   }
 
   async alterOne(request: Request, response: Response) {
     const body = request.body
-    const {symptom_name} = request.params
+    const { symptom } = request.params
 
     const symptomRepository = getCustomRepository(SymptomRepository)
-    const symptom = await symptomRepository.findOne({
-      symptom: symptom_name
-    })
+    const isValidSymptom = await symptomRepository.findOne({ symptom })
 
-    if(!symptom){
+    if(!isValidSymptom){
       return response.status(404).json({
-        error: "Symptom not found"
+        error: "Sintoma não encontrado"
       })
     }
 
@@ -77,27 +73,27 @@ class SymptomController {
       await symptomRepository.createQueryBuilder()
         .update(Symptom)
         .set(body)
-        .where("symptom = :symptom_name", {symptom_name: symptom_name})
+        .where("symptom = :symptom", { symptom })
         .execute()
-      return response.status(200).json(body)
+      return response.status(200).json({
+        success: "Sintoma atualizado com sucesso",
+      })
     } catch (error) {
       return response.status(403).json({
-        error: "Symptom already registered"
+        error: "Erro na atualização do sintoma"
       })
     }
   }
 
   async deleteOne(request: Request, response: Response) {
-    const {symptom_name} = request.params
+    const { symptom } = request.params
 
     const symptomRepository = getCustomRepository(SymptomRepository)
-    const symptom = await symptomRepository.findOne({
-      symptom: symptom_name
-    })
+    const isValidSymptom = await symptomRepository.findOne({ symptom })
 
-    if(!symptom){
+    if(!isValidSymptom){
       return response.status(404).json({
-        error: "Symptom not found"
+        error: "Sintoma não encontrado"
       })
     }
 
@@ -105,14 +101,14 @@ class SymptomController {
       await symptomRepository.createQueryBuilder()
         .delete()
         .from(Symptom)
-        .where("symptom = :symptom_name", {symptom_name: symptom_name})
+        .where("symptom = :symptom", { symptom })
         .execute()
       return response.status(200).json({
-        message: "Symptom deleted"
+        success: "Sintoma deletado com sucesso"
       })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na deleção do sintoma"
       })
     }
   }

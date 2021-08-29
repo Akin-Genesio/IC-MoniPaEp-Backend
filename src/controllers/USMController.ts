@@ -36,20 +36,11 @@ class USMController{
     const { name } = request.query
 
     const usmRepository = getCustomRepository(USMRepository)
-
     let filters = {}
 
     if(name) {
       filters = { ...filters, name: String(name) }
-    }
 
-    const hasQueryParams = Object.keys(filters).length
-
-    if(!hasQueryParams) {
-      const usmList = await usmRepository.find()
-
-      return response.status(200).json(usmList)
-    } else {
       const isValidUsm = await usmRepository.findOne({
         name: String(name)
       })
@@ -59,11 +50,10 @@ class USMController{
           error: "Unidade de saúde não encontrada"
         })
       }
-
-      const usmList = await usmRepository.find(filters)
-
-      return response.status(200).json(usmList)
     }
+    const usmList = await usmRepository.find(filters)
+
+    return response.status(200).json(usmList)
   }
 
   async alterOne(request: Request, response: Response){

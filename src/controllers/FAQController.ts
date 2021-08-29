@@ -42,46 +42,35 @@ class FAQController{
 
     if(id) {
       filters = { ...filters, id: String(id) }
+
+      const questionExists = await faqRepository.findOne({
+        id: String(id)
+      })
+
+      if(!questionExists) {
+        return response.status(404).json({
+          error: "Questão não encontrada"
+        })
+      }
     }
 
     if(question) {
       filters = { ...filters, question: String(question) }
-    }
-
-    const hasQueryParams = Object.keys(filters).length
-
-    if(!hasQueryParams) {
-      const questionsList = await faqRepository.find()
-
-      return response.status(200).json(questionsList)
-    } else {
-      if(id) {
-        const questionExists = await faqRepository.findOne({
-          id: String(id)
-        })
-  
-        if(!questionExists) {
-          return response.status(404).json({
-            error: "Questão não encontrada"
-          })
-        }
-      }
       
-      if(question) {
-        const questionExists = await faqRepository.findOne({
-          question: String(question)
+      const questionExists = await faqRepository.findOne({
+        question: String(question)
+      })
+
+      if(!questionExists) {
+        return response.status(404).json({
+          error: "Questão não encontrada"
         })
-  
-        if(!questionExists) {
-          return response.status(404).json({
-            error: "Questão não encontrada"
-          })
-        }
       }
-      const questionsList = await faqRepository.find(filters)
-  
-      return response.status(200).json(questionsList)
     }
+
+    const questionsList = await faqRepository.find(filters)
+  
+    return response.status(200).json(questionsList)
   }
 
   async alterOne(request: Request, response: Response) {

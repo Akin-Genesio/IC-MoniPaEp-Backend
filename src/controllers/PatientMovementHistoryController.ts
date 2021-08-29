@@ -42,48 +42,35 @@ class PatientMovementHistoryController {
 
     if(id) {
       filters = { ...filters, id: String(id) }
+
+      const isValidPatientMovementHistory = await patientMovementRepository.findOne({
+        id: String(id)
+      })
+
+      if (!isValidPatientMovementHistory) {
+        return response.status(404).json({
+          error: "Histórico de movimentação não encontrado"
+        })
+      }
     }
 
     if(disease_occurrence_id) {
       filters = { ...filters, disease_occurrence_id: String(disease_occurrence_id) }
-    }
 
-    const hasQueryParams = Object.keys(filters).length
-
-    if(!hasQueryParams) {
-      const movementHistory = await patientMovementRepository.find()
-
-      return response.status(200).json(movementHistory)
-    } else {
-      if(disease_occurrence_id) {
-        const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
-        const isValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
-          id: String(disease_occurrence_id)
-        })
+      const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
+      const isValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
+        id: String(disease_occurrence_id)
+      })
   
-        if (!isValidDiseaseOccurrence) {
-          return response.status(404).json({
-            error: "Ocorrência de doença não encontrada"
-          })
-        }
-      }
-
-      if(id) {
-        const isValidPatientMovementHistory = await patientMovementRepository.findOne({
-          id: String(id)
+      if (!isValidDiseaseOccurrence) {
+        return response.status(404).json({
+          error: "Ocorrência de doença não encontrada"
         })
-        console.log(isValidPatientMovementHistory)
-
-        if (!isValidPatientMovementHistory) {
-          return response.status(404).json({
-            error: "Histórico de movimentação não encontrado"
-          })
-        }
       }
-      const movementHistoryItems = await patientMovementRepository.find(filters)
-
-      return response.status(200).json(movementHistoryItems)
     }
+    const movementHistoryItems = await patientMovementRepository.find(filters)
+
+    return response.status(200).json(movementHistoryItems)
   }
 
   async alterOne(request: Request, response: Response) {

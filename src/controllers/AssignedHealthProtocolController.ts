@@ -39,7 +39,7 @@ class AssignedHealthProtocolController {
     })
 
     if(isAlreadyAssigned) {
-      return response.status(406).json({
+      return response.status(403).json({
         error: "Este protocolo de saúde já está atribuído à essa doença"
       })
     }
@@ -95,12 +95,21 @@ class AssignedHealthProtocolController {
     }
     const assignedHealthProtocolRepository = getCustomRepository(AssignedHealthProtocolRepository)
 
-    const associationList = await assignedHealthProtocolRepository.find(filters)
+    const associationList = await assignedHealthProtocolRepository.find({
+      where: filters,
+      select: ['disease_name'],
+      relations: ["healthprotocol"],
+    })
+    // const associationList = await assignedHealthProtocolRepository.createQueryBuilder()
+    //   .leftJoinAndSelect("AssignedHealthProtocol.healthprotocol", "healthProtocols")
+    //   .select(['disease_name', 'healthprotocol_id', 'description'])
+    //   .execute()
+
     return response.status(200).json(associationList)
   }
 
   async deleteOne(request: Request, response: Response) {
-    const { disease_name, healthprotocol_id} = request.params
+    const { disease_name, healthprotocol_id } = request.params
     
     const assignedHealthProtocolRepository = getCustomRepository(AssignedHealthProtocolRepository)
     const diseaseRepository = getCustomRepository(DiseaseRepository)
@@ -142,8 +151,8 @@ class AssignedHealthProtocolController {
         .delete()
         .from(AssignedHealthProtocol)
         .where("healthprotocol_id = :healthprotocol_id and disease_name = :disease_name", {
-          healthprotocol_id: healthprotocol_id, 
-          disease_name: disease_name
+          healthprotocol_id, 
+          disease_name
         })
         .execute()
       return response.status(200).json({

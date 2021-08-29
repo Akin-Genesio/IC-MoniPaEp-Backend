@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
 import { SystemUser } from "./SystemUser";
 
 @Entity("permissions")
@@ -6,7 +6,8 @@ class Permissions {
   @PrimaryColumn()
   userId: string
 
-  @JoinColumn({name: "userId"})
+  @OneToOne(() => SystemUser)
+  @JoinColumn({ name: "userId", referencedColumnName: "id"})
   systemUser: SystemUser
 
   @Column()
