@@ -92,10 +92,10 @@ router.put("/symptom/:symptom", jwt.authMiddleware, jwt.localAdminMiddleware, sy
 router.delete("/symptom/:symptom", jwt.authMiddleware, jwt.localAdminMiddleware, symptomController.deleteOne)//adm e adm locais
 
 //DiseaseOccurrence Routes - logica do status do paciente
-router.post("/diseaseoccurrence", jwt.authMiddleware, diseaseOccurrenceController.create)//geral autenticado*
+router.post("/diseaseoccurrence", jwt.authMiddleware, jwt.systemUserMiddleware, diseaseOccurrenceController.create)//geral autenticado*
 router.get("/diseaseoccurrence", jwt.authMiddleware, diseaseOccurrenceController.list)//geral autenticado
-router.put("/diseaseoccurrence/:id", jwt.authMiddleware, diseaseOccurrenceController.alterOne)//geral autenticado*
-router.delete("/diseaseoccurrence/:id", jwt.authMiddleware, diseaseOccurrenceController.deleteOne)//geral autenticado*
+router.put("/diseaseoccurrence/:id", jwt.authMiddleware, jwt.systemUserMiddleware, diseaseOccurrenceController.alterOne)//geral autenticado*
+router.delete("/diseaseoccurrence/:id", jwt.authMiddleware, jwt.systemUserMiddleware, diseaseOccurrenceController.deleteOne)//geral autenticado*
 
 //SymptomOccurrence Routes - Okk
 router.post("/symptomoccurrence", jwt.authMiddleware, symptomOccurrenceController.create)//geral autenticado*
