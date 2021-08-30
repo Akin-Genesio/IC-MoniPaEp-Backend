@@ -110,6 +110,7 @@ class DiseaseOccurrenceController {
     const diseaseOccurrences = await diseaseOccurrenceRepository.find({
       patient_id: patientExists.id
     })
+    
     let finalStatus = diseaseOccurrences[0].status
     if(finalStatus !== "Óbito") {
       for(let occurrence of diseaseOccurrences) {
@@ -131,7 +132,7 @@ class DiseaseOccurrenceController {
         }
       }
     }
-    
+
     try {
       await patientsRepository.createQueryBuilder()
         .update(Patient)
@@ -303,14 +304,19 @@ class DiseaseOccurrenceController {
     const { id } = request.params
     
     const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
+    const patientsRepository = getCustomRepository(PatientsRepository)
 
-    const diseaseOccurrence = await diseaseOccurrenceRepository.findOne({ id })
+    const isValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({ id })
 
-    if(!diseaseOccurrence){
+    if(!isValidDiseaseOccurrence){
       return response.status(404).json({
         error: "Ocorrência de doença não encontrada"
       })
     }
+
+    const patient = await patientsRepository.findOne({
+      id: isValidDiseaseOccurrence.patient_id
+    })
 
     try {
       await diseaseOccurrenceRepository.createQueryBuilder()
@@ -318,6 +324,44 @@ class DiseaseOccurrenceController {
         .from(DiseaseOccurrence)
         .where("id = :id", { id })
         .execute()
+      const diseaseOccurrences = await diseaseOccurrenceRepository.find({
+        patient_id: patient.id
+      })
+      
+      let finalStatus = diseaseOccurrences[0]?.status ?? "Saudável"
+      if(finalStatus !== "Óbito" || diseaseOccurrences.length === 0) {
+        for(let occurrence of diseaseOccurrences) {
+          if(occurrence.status === "Óbito") {
+            finalStatus = "Óbito"
+            break
+          }
+          else if(occurrence.status === "Infectado") {
+            finalStatus = "Infectado"
+          }
+          else if(occurrence.status === "Suspeito" && finalStatus !== "Infectado") {
+            finalStatus = "Suspeito"
+          }
+          else if(
+            (occurrence.status === "Saudável" || occurrence.status === "Curado") 
+            && finalStatus !== "Infectado" && finalStatus !== "Suspeito"
+          ) {
+            finalStatus = "Saudável"
+          }
+        }
+      }
+  
+      try {
+        await patientsRepository.createQueryBuilder()
+          .update(Patient)
+          .set({ status: finalStatus })
+          .where("id = :id", { id: patient.id })
+          .execute()
+      } catch (error) {
+        return response.status(404).json({
+          error: "Erro na atualização do status do paciente"
+        })
+      }
+
       return response.status(200).json({
         message: "Ocorrência de doença deletada"
       })
