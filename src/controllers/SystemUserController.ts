@@ -65,7 +65,7 @@ class SystemUserController {
     const [email, password] = Buffer.from(hash, 'base64').toString().split(':')
     
     const systemUserRepository = getCustomRepository(SystemUserRepository)
-    const userExists: any = await systemUserRepository.findOne({
+    const userExists = await systemUserRepository.findOne({
       where: { email }, 
       select: ['id', 'email', 'password', 'name', 'department']
     })
@@ -128,9 +128,32 @@ class SystemUserController {
         type: 'system_user'
       })
 
+      userExists.password = undefined
+      const permissions: string[] = []
+      const roles: string[] = ['system.user']
+
+      if(userExists.department === "USM") {
+        permissions.push('usm.user')
+      }
+
+      if(userExists.department === "SVS") {
+        permissions.push('svs.user')
+      }
+
+      if(userPermissions.localAdm) {
+        roles.push('local.admin')
+      }
+
+      if(userPermissions.generalAdm) {
+        roles.push('general.admin')
+      }
+
       return response.status(200).json({
+        user: userExists,
+        permissions,
+        roles,
         token,
-        refreshToken,
+        refreshToken: refreshToken.id,
       })
 
     } catch (error) {
@@ -179,7 +202,12 @@ class SystemUserController {
     }
     
     const systemUserRepository = getCustomRepository(SystemUserRepository)
-    const user = await systemUserRepository.findOne({ id })
+    const permissionsRepository = getCustomRepository(PermissionsRepository)
+
+    const user = await systemUserRepository.findOne({
+      where: { id }, 
+      select: ['id', 'email', 'password', 'name', 'department']
+    })
 
     if(!user) {
       return response.status(401).json({
@@ -187,7 +215,42 @@ class SystemUserController {
       })
     }
 
-    return response.status(200).json(user)
+    const userPermissions = await permissionsRepository.findOne({
+      userId: id
+    })
+
+    if(!userPermissions) {
+      return response.status(400).json({
+        error: "Usuário sem permissões cadastradas"
+      })
+    }
+
+
+    user.password = undefined
+    const permissions: string[] = []
+    const roles: string[] = ['system.user']
+
+    if(user.department === "USM") {
+      permissions.push('usm.user')
+    }
+
+    if(user.department === "SVS") {
+      permissions.push('svs.user')
+    }
+
+    if(userPermissions.localAdm) {
+      roles.push('local.admin')
+    }
+
+    if(userPermissions.generalAdm) {
+      roles.push('general.admin')
+    }
+
+    return response.status(200).json({
+      user,
+      permissions,
+      roles,
+    })
   }
 
   async alterOne(request: Request, response: Response) {

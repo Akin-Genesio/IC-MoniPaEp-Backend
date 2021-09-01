@@ -18,8 +18,9 @@ class RefreshTokenController {
     })
 
     if(!refreshTokenExists) {
-      return response.status(404).json({
-        error: "Refresh token não encontrado"
+      return response.status(401).json({
+        error: "Refresh token não encontrado",
+        code: "refresh.token.invalid"
       })
     }
 
@@ -33,12 +34,13 @@ class RefreshTokenController {
           .where("id = :id", { id: refreshTokenExists.id })
           .execute();
       } catch (error) {
-        return response.status(404).json({
-          error: "Erro na deleção do refresh token"
+        return response.status(401).json({
+          error: "Erro na deleção do refresh token",
+          code: "refresh.token.deletion"
         })
       }
 
-      return response.status(404).json({
+      return response.status(401).json({
         error: "Refresh token expirado",
         code: "refresh.token.expired"
       })
@@ -82,16 +84,18 @@ class RefreshTokenController {
 
         const refreshToken = await refreshTokenRepository.save(refreshTokenBody)
         
-        return response.status(200).json({ token, refreshToken })
+        return response.status(200).json({ token, refreshToken: refreshToken.id })
 
       } else {
-        return response.status(403).json({
-          error: "Erro na geração do refresh token"
+        return response.status(401).json({
+          error: "Erro na geração do refresh token",
+          code: "refresh.token.generation"
         })
       }
     } catch (error) {
-      return response.status(403).json({
-        error: "Erro na criação do refresh token"
+      return response.status(401).json({
+        error: "Erro na criação do refresh token",
+        code: "refresh.token.creation"
       })
     }
   }
