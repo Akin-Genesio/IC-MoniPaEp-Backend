@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { getCustomRepository } from 'typeorm';
 import bcrypt from 'bcrypt'
-import dayjs from 'dayjs'
 
 import * as jwt from "../jwt"
 import { Patient, RefreshToken } from "../models";
@@ -57,12 +56,12 @@ class PatientController{
   }
 
   async loginPost(request: Request, response: Response){
-    const { email, password } = request.body
+    const { CPF, password } = request.body
 
     const patientsRepository = getCustomRepository(PatientsRepository)
     const patientExists: any = await patientsRepository.findOne({
-      where: { email }, 
-      select: ['id', 'email', 'password']
+      where: { CPF }, 
+      select: ['id', 'CPF', 'password']
     })
 
     if (!patientExists) {
