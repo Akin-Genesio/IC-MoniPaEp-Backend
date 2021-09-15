@@ -115,10 +115,10 @@ router.put("/patientmovementhistory/:id", jwt.authMiddleware, patientMovementHis
 router.delete("/patientmovementhistory/:id", jwt.authMiddleware, patientMovementHistoryController.deleteOne) //geral autenticado*
 
 //FAQ Routes
-router.post("/faq", jwt.authMiddleware, jwt.localAdminMiddleware, faqController.create)//adm e adm local
+router.post("/faq", jwt.authMiddleware, jwt.systemUserMiddleware, faqController.create)//usuario de sistema autenticado
 router.get("/faq", faqController.list)//geral
-router.put("/faq/:id", jwt.authMiddleware, jwt.localAdminMiddleware, faqController.alterOne)//adm e adm local
-router.delete("/faq/:id", jwt.authMiddleware, jwt.localAdminMiddleware, faqController.deleteOne)//adm e adm local
+router.put("/faq/:id", jwt.authMiddleware, jwt.systemUserMiddleware, faqController.alterOne)//usuario de sistema autenticado
+router.delete("/faq/:id", jwt.authMiddleware, jwt.systemUserMiddleware, faqController.deleteOne)//usuario de sistema autenticado
 
 //FAQ Suggestions Routes
 

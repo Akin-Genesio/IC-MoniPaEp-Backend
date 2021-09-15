@@ -18,12 +18,13 @@ class SystemUserController {
       where: [
         { CPF: body.CPF },
         { email: body.email }
-      ] 
+      ],
+      
     })
 
     if (userAlreadyExists) {
       return response.status(400).json({
-        error: "Email/CPF já cadastrado"
+        error: "Email e/ou CPF já cadastrados."
       })
     }
 
@@ -42,11 +43,11 @@ class SystemUserController {
     
       userSaved.password = undefined      
       return response.status(201).json({
-        success: "Usuário criado com sucesso"
+        success: "Usuário criado com sucesso."
       })
     } catch (error) {
       return response.status(403).json({
-        error: "Erro na criação do usuário"
+        error: "Erro na criação do usuário."
       })
     }
   }
@@ -58,7 +59,7 @@ class SystemUserController {
       [, hash] = request.headers.authorization.split(' ')
     } catch (error) {
       return response.status(401).json({
-        error: "Credenciais necessárias"
+        error: "Credenciais necessárias."
       })
     }
 
@@ -72,7 +73,7 @@ class SystemUserController {
 
     if (!userExists) {
       return response.status(401).json({
-        error: "Usuário não encontrado"
+        error: "Email e/ou senha inválidos."
       })
     }
 
@@ -81,7 +82,7 @@ class SystemUserController {
 
     if(!validPassword) {
       return response.status(400).json({
-        error: "Email e/ou senha inválidos"
+        error: "Email e/ou senha inválidos."
       })
     }
 
@@ -99,7 +100,7 @@ class SystemUserController {
 
       if(!userPermissions.authorized) {
         return response.status(400).json({
-          error: "Usuário não autorizado"
+          error: "Usuário não autorizado por um administrador",
         })
       }
       
@@ -123,11 +124,6 @@ class SystemUserController {
 
       const refreshToken = await refreshTokenRepository.save(refreshTokenBody)
 
-      const token = jwt.sign({
-        id: systemUserId,
-        type: 'system_user'
-      })
-
       userExists.password = undefined
       const permissions: string[] = []
       const roles: string[] = ['system.user']
@@ -147,6 +143,13 @@ class SystemUserController {
       if(userPermissions.generalAdm) {
         roles.push('general.admin')
       }
+
+      const token = jwt.sign({
+        id: systemUserId,
+        type: 'system_user',
+        permissions,
+        roles,
+      })
 
       return response.status(200).json({
         user: userExists,

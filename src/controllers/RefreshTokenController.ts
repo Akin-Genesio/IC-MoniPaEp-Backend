@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import * as jwt from "../jwt"
 
 import { RefreshToken } from "../models";
-import { RefreshTokenRepository } from "../repositories";
+import { PermissionsRepository, RefreshTokenRepository, SystemUserRepository } from "../repositories";
 import { refreshTokenExpiresIn } from "../refreshTokenExpiration";
 
 class RefreshTokenController {
@@ -72,9 +72,55 @@ class RefreshTokenController {
         return response.status(200).json({ isPatientId, token, refreshToken })
 
       } else if(isSystemUserId) {
+        const systemUserRepository = getCustomRepository(SystemUserRepository)
+        const permissionsRepository = getCustomRepository(PermissionsRepository)
+
+        const user = await systemUserRepository.findOne({
+          id: isSystemUserId
+        })
+
+        if(!user) {
+          return response.status(401).json({
+            error: "Usuário inválido",
+            code: "refresh.token.generation"
+          })
+        }
+
+        const userPermissions = await permissionsRepository.findOne({
+          userId: isSystemUserId
+        })
+
+        if(!userPermissions) {
+          return response.status(401).json({
+            error: "Permissões não encontradas",
+            code: "refresh.token.generation"
+          })
+        }
+
+        const permissions: string[] = []
+        const roles: string[] = ['system.user']
+
+        if(user.department === "USM") {
+          permissions.push('usm.user')
+        }
+
+        if(user.department === "SVS") {
+          permissions.push('svs.user')
+        }
+
+        if(userPermissions.localAdm) {
+          roles.push('local.admin')
+        }
+
+        if(userPermissions.generalAdm) {
+          roles.push('general.admin')
+        }
+        
         const token = jwt.sign({
           id: isSystemUserId,
-          type: 'system_user'
+          type: 'system_user',
+          permissions,
+          roles
         })
 
         const refreshTokenBody = refreshTokenRepository.create({

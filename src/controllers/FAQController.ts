@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getCustomRepository } from 'typeorm'
+import { getCustomRepository, Like } from 'typeorm'
 import { FAQ } from "../models";
 import { FAQRepository } from "../repositories/FAQRepository";
 
@@ -41,8 +41,6 @@ class FAQController{
     let filters = {}
 
     if(id) {
-      filters = { ...filters, id: String(id) }
-
       const questionExists = await faqRepository.findOne({
         id: String(id)
       })
@@ -52,25 +50,20 @@ class FAQController{
           error: "Questão não encontrada"
         })
       }
+
+      filters = { ...filters, id: String(id) }
     }
 
     if(question) {
-      filters = { ...filters, question: String(question) }
-      
-      const questionExists = await faqRepository.findOne({
-        question: String(question)
-      })
-
-      if(!questionExists) {
-        return response.status(404).json({
-          error: "Questão não encontrada"
-        })
-      }
+      filters = { ...filters, question: Like(`%${String(question)}%`) }
     }
 
-    const questionsList = await faqRepository.find(filters)
+    const questionsList = await faqRepository.findAndCount(filters)
   
-    return response.status(200).json(questionsList)
+    return response.status(200).json({
+      faqs: questionsList[0],
+      totalFaqs: questionsList[1],
+    })
   }
 
   async alterOne(request: Request, response: Response) {

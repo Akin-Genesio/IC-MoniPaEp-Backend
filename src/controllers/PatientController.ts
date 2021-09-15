@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
-import { getCustomRepository } from 'typeorm';
+import { getCustomRepository, Like } from 'typeorm';
 import bcrypt from 'bcrypt'
-import dayjs from 'dayjs'
 
 import * as jwt from "../jwt"
 import { Patient, RefreshToken } from "../models";
@@ -138,7 +137,14 @@ class PatientController{
   }
 
   async list(request: Request, response: Response){
-    const { id, status, active } = request.query
+    const { 
+      id, 
+      name,
+      cpf,
+      neighborhood,
+      status, 
+      active, 
+      page } = request.query
     let filters = {}
 
     const patientsRepository = getCustomRepository(PatientsRepository)
@@ -158,7 +164,7 @@ class PatientController{
     }
 
     if(status) {
-      filters = { ...filters, status: String(status) }
+      filters = { ...filters, status: Like(`%${String(status).toUpperCase()}%`)}
     }
 
     if(active) {     
@@ -168,9 +174,36 @@ class PatientController{
         filters = { ...filters, activeAccount: false }
       }
     }   
-    const patientsList = await patientsRepository.find(filters)
 
-    return response.json(patientsList)
+    if(name) {
+      filters = { ...filters, name: Like(`%${String(name)}%`)}
+    }
+
+    if(cpf) {
+      filters = { ...filters, CPF: Like(`%${String(cpf)}%`)}
+    }
+
+    if(neighborhood) {
+      filters = { ...filters, neighborhood: Like(`%${String(neighborhood)}%`)}
+    }
+
+    let options: any = {
+      where: filters,
+      order: {
+        createdAt: 'DESC'
+      },
+    }
+
+    if(page) {
+      const take = 10
+      options = { ...options, take, skip: ((Number(page) - 1) * take) }
+    }
+    
+    const patientsList = await patientsRepository.findAndCount(options)
+    return response.json({
+      patients: patientsList[0],
+      totalPatients: patientsList[1]
+    })
   } 
 
   async getOneWithToken(request, response: Response) {

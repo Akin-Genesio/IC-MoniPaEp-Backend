@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getCustomRepository } from "typeorm";
+import { getCustomRepository, Like } from "typeorm";
 import { Symptom } from "../models";
 import { SymptomRepository } from "../repositories/SymptomRepository";
 
@@ -34,26 +34,35 @@ class SymptomController {
   }
 
   async list(request: Request, response: Response){
-    const { symptom } = request.query
+    const { symptom, page } = request.query
+    let filters = {}
     
     const symptomRepository = getCustomRepository(SymptomRepository)
-    
-    if(!symptom) {
-      const symptomsList = await symptomRepository.find()
-      return response.status(200).json(symptomsList)
-    } else {
-      const symptomItem = await symptomRepository.findOne({
-        symptom: String(symptom)
-      })
 
-      if(!symptomItem){
-        return response.status(404).json({
-          error: "Sintoma não encontrado"
-        })
-      }
+    if(symptom) {
+      filters = { symptom: Like(`%${String(symptom)}%`) }
+    } 
 
-      return response.status(200).json(symptomItem)
+    let options: any = {
+      where: filters,
+      order: {
+        symptom: 'ASC'
+      },
     }
+
+    if(page) {
+      const take = 10
+      options = { ...options, take, skip: ((Number(page) - 1) * take) }
+    }
+
+    console.log(options)
+
+    const symptomsList = await symptomRepository.findAndCount(options)
+
+    return response.status(200).json({
+      symptoms: symptomsList[0],
+      totalSymptoms: symptomsList[1]
+    })
   }
 
   async alterOne(request: Request, response: Response) {
