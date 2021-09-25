@@ -1,4 +1,4 @@
-import {MigrationInterface, QueryRunner, Table} from "typeorm";
+import { MigrationInterface, QueryRunner, Table } from "typeorm";
 
 export class USM1617147672105 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -13,6 +13,10 @@ export class USM1617147672105 implements MigrationInterface {
           },
           {
             name: "address",
+            type: "varchar"
+          },
+          {
+            name: "neighborhood",
             type: "varchar"
           },
           {

@@ -68,10 +68,10 @@ router.put("/patients/deactivate/:id", jwt.authMiddleware, patientController.dea
 router.delete("/patients/:id", jwt.authMiddleware, jwt.systemUserMiddleware, patientController.deleteOne) //funcionarios autenticados
 
 //USM Routes
-router.post("/usm", jwt.authMiddleware, jwt.localAdminMiddleware, usmController.create)//adm e adm local
+router.post("/usm", jwt.authMiddleware, jwt.adminMiddleware, usmController.create)//adm e adm local
 router.get("/usm", usmController.list)//geral sem autenticacao
-router.put("/usm/:name", jwt.authMiddleware, jwt.localAdminMiddleware, usmController.alterOne)//adm e adm local
-router.delete("/usm/:name", jwt.authMiddleware, jwt.localAdminMiddleware, usmController.deleteOne)//adm e adm local
+router.put("/usm/:name", jwt.authMiddleware, jwt.adminMiddleware, usmController.alterOne)//adm e adm local
+router.delete("/usm/:name", jwt.authMiddleware, jwt.adminMiddleware, usmController.deleteOne)//adm e adm local
 
 //Disease Routes
 router.post("/disease", jwt.authMiddleware, jwt.localAdminMiddleware, diseaseController.create)//adm e adm locais

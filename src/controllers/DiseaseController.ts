@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getCustomRepository } from "typeorm";
+import { getCustomRepository, Like } from "typeorm";
 import { Disease } from "../models";
 import { DiseaseRepository } from "../repositories";
 class DiseaseController{
@@ -33,27 +33,33 @@ class DiseaseController{
   }
 
   async list(request: Request, response: Response){
-    const { name } = request.query
+    const { name, page } = request.query
+    let filters = {}
 
     const diseaseRepository = getCustomRepository(DiseaseRepository)
 
-    if(!name) {
-      const diseaseList = await diseaseRepository.find()
-
-      return response.status(200).json(diseaseList)
-    } else {
-      const isValidDisease = await diseaseRepository.findOne({
-        name: String(name)
-      })
-
-      if(!isValidDisease){
-        return response.status(404).json({
-          error: "Doença não encontrada"
-        })
-      }
-
-      return response.status(200).json(isValidDisease)
+    if(name) {
+      filters = { name: Like(`%${String(name)}%`) }
     }
+
+    let options: any = {
+      where: filters,
+      order: {
+        name: 'ASC'
+      },
+    }
+
+    if(page) {
+      const take = 10
+      options = { ...options, take, skip: ((Number(page) - 1) * take) }
+    }
+
+    const diseaseList = await diseaseRepository.findAndCount(options)
+
+    return response.status(200).json({
+      diseases: diseaseList[0],
+      totalDiseases: diseaseList[1],
+    })
   }
 
   async alterOne(request: Request, response: Response){

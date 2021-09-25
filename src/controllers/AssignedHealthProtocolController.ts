@@ -60,7 +60,7 @@ class AssignedHealthProtocolController {
   }
 
   async list(request: Request, response: Response) {
-    const { disease_name, healthprotocol_id } = request.query
+    const { disease_name, healthprotocol_id, page } = request.query
 
     let filters = {}
 
@@ -93,19 +93,25 @@ class AssignedHealthProtocolController {
         })
       }
     }
+
+    let options: any = {
+      where: filters,
+      relations: ["healthprotocol"]
+    }
+
+    if(page) {
+      const take = 10
+      options = { ...options, take, skip: ((Number(page) - 1) * take) }
+    }
+    
     const assignedHealthProtocolRepository = getCustomRepository(AssignedHealthProtocolRepository)
 
-    const associationList = await assignedHealthProtocolRepository.find({
-      where: filters,
-      select: ["disease_name"],
-      relations: ["healthprotocol"],
-    })
-    // const associationList = await assignedHealthProtocolRepository.createQueryBuilder()
-    //   .leftJoinAndSelect("AssignedHealthProtocol.healthprotocol", "healthProtocols")
-    //   .select(['disease_name', 'healthprotocol_id', 'description'])
-    //   .execute()
+    const associationList = await assignedHealthProtocolRepository.findAndCount(options)
 
-    return response.status(200).json(associationList)
+    return response.status(200).json({
+      assignedHealthProtocols: associationList[0],
+      totalAssignedHealthProtocols: associationList[1],
+    })
   }
 
   async deleteOne(request: Request, response: Response) {

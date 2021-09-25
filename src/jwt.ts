@@ -148,7 +148,9 @@ export const usmUserMiddleware = async (request, response: Response, next) => {
         code: "invalid.system.user"
       })
     } else {
-      if(isValidId.department === "USM") {
+      const permissionsRepository = getCustomRepository(PermissionsRepository)
+      const userPermissions = await permissionsRepository.findOne({ userId: id })
+      if(isValidId.department === "USM" || userPermissions.generalAdm) {
         return next()
       } else {
         return response.status(401).json({

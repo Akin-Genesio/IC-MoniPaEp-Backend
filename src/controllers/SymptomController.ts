@@ -55,8 +55,6 @@ class SymptomController {
       options = { ...options, take, skip: ((Number(page) - 1) * take) }
     }
 
-    console.log(options)
-
     const symptomsList = await symptomRepository.findAndCount(options)
 
     return response.status(200).json({

@@ -48,9 +48,24 @@ class PermissionsController {
   }
 
   async list (request: Request, response: Response) {
-    const { id } = request.query
+    const { id, page } = request.query
 
     let filters = {}
+
+    let options: any = {
+      where: filters,
+      relations: ["systemUser"],
+      order: {
+        authorized: 'ASC',
+        localAdm: 'ASC',
+        generalAdm: 'ASC',
+      }
+    }
+
+    if(page) {
+      const take = 10
+      options = { ...options, take, skip: ((Number(page) - 1) * take) }
+    }
 
     const permissionsRepository = getCustomRepository(PermissionsRepository)
     
@@ -68,17 +83,17 @@ class PermissionsController {
       }
     }
 
-    const permissionsList = await permissionsRepository.find({
-      where: filters,
-      select: ["authorized", "localAdm", "generalAdm"],
-      relations: ["systemUser"]
-    })
+    const permissionsList = await permissionsRepository.findAndCount(options)
 
-    return response.status(200).json(permissionsList)
+    return response.status(200).json({
+      systemUsers: permissionsList[0],
+      totalSystemUsers: permissionsList[1],
+    })
   }
 
-  async alterOne(request: Request, response: Response){
+  async alterOne(request, response: Response){
     const body = request.body
+    const tokenPayload = request.tokenPayload
     const { id } = request.params
 
     const permissionsRepository = getCustomRepository(PermissionsRepository)
@@ -91,6 +106,18 @@ class PermissionsController {
       return response.status(404).json({
         error: "Usuário não encontrado"
       })
+    }
+
+    if(body.generalAdm !== undefined) {
+      console.log(tokenPayload)
+      const tokenUser = await permissionsRepository.findOne({
+        userId: tokenPayload.id
+      })
+      if(!tokenUser.generalAdm) {
+        return response.status(404).json({
+          error: "Usuário sem permissão para tal alteração"
+        })
+      }
     }
 
     try {

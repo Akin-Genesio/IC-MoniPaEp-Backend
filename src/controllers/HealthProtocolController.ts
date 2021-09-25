@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getCustomRepository } from "typeorm";
+import { getCustomRepository, Like } from "typeorm";
 import { HealthProtocol } from "../models";
 import { HealthProtocolRepository } from "../repositories/HealthProtocolRepository";
 
@@ -23,7 +23,7 @@ class HealthProtocolController {
       const healthProtocol = await healthProtocolRepository.save(healthProtocolBody)
 
       return response.status(201).json({
-        message: "Protocolo de saúde registrado com sucesso",
+        success: "Protocolo de saúde registrado com sucesso",
         health_protocol: healthProtocol
       })
     } catch (error) {
@@ -34,11 +34,14 @@ class HealthProtocolController {
   }
 
   async list(request: Request, response: Response){
-    const { id } = request.query
+    const { id, page, description } = request.query
+    let filters = {}
     
     const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
 
     if(id) {
+      filters = { id: String(id) }
+
       const isValidHealthProtocol = await healthProtocolRepository.findOne({
         id: String(id)
       })
@@ -51,9 +54,29 @@ class HealthProtocolController {
 
       return response.status(200).json(isValidHealthProtocol)
     }
-    const healthProtocolList = await healthProtocolRepository.find()
 
-    return response.status(200).json(healthProtocolList)
+    if(description) {
+      filters = { description: Like(`%${String(description)}%`) }
+    } 
+
+    let options: any = {
+      where: filters,
+      order: {
+        description: 'ASC'
+      },
+    }
+
+    if(page) {
+      const take = 10
+      options = { ...options, take, skip: ((Number(page) - 1) * take) }
+    }
+
+    const healthProtocolList = await healthProtocolRepository.findAndCount(options)
+
+    return response.status(200).json({
+      healthProtocols: healthProtocolList[0],
+      totalHealthProtocols: healthProtocolList[1],
+    })
   }
 
   async alterOne(request: Request, response: Response){

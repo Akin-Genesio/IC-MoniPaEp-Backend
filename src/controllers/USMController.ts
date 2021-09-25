@@ -33,27 +33,32 @@ class USMController{
   }
 
   async list(request: Request, response: Response){
-    const { name } = request.query
-
-    const usmRepository = getCustomRepository(USMRepository)
+    const { name, page } = request.query
     let filters = {}
 
     if(name) {
       filters = { ...filters, name: String(name) }
-
-      const isValidUsm = await usmRepository.findOne({
-        name: String(name)
-      })
-      
-      if(!isValidUsm){
-        return response.status(404).json({
-          error: "Unidade de saúde não encontrada"
-        })
-      }
     }
-    const usmList = await usmRepository.find(filters)
 
-    return response.status(200).json(usmList)
+    let options: any = {
+      where: filters,
+      order: {
+        name: 'ASC'
+      },
+    }
+
+    if(page) {
+      const take = 10
+      options = { ...options, take, skip: ((Number(page) - 1) * take) }
+    }
+
+    const usmRepository = getCustomRepository(USMRepository)
+    const usmList = await usmRepository.findAndCount(options)
+
+    return response.status(200).json({
+      usms: usmList[0],
+      totalUsms: usmList[1]
+    })
   }
 
   async alterOne(request: Request, response: Response){
