@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getCustomRepository } from "typeorm";
+import { getCustomRepository, Like } from "typeorm";
 import { USM } from "../models";
 import { USMRepository } from "../repositories";
 class USMController{
@@ -37,7 +37,7 @@ class USMController{
     let filters = {}
 
     if(name) {
-      filters = { ...filters, name: String(name) }
+      filters = { ...filters, name: Like(`%${String(name)}%`) }
     }
 
     let options: any = {

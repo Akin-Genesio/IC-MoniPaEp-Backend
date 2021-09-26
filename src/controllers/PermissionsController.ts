@@ -48,10 +48,12 @@ class PermissionsController {
   }
 
   async list (request: Request, response: Response) {
-    const { id, page } = request.query
-
+    const { id, page, name, department } = request.query
+    const take = 10
     let filters = {}
-
+    
+    const permissionsRepository = getCustomRepository(PermissionsRepository)
+    
     let options: any = {
       where: filters,
       relations: ["systemUser"],
@@ -63,11 +65,9 @@ class PermissionsController {
     }
 
     if(page) {
-      const take = 10
       options = { ...options, take, skip: ((Number(page) - 1) * take) }
     }
 
-    const permissionsRepository = getCustomRepository(PermissionsRepository)
     
     if(id) {
       filters = { ...filters, userId: String(id) }
@@ -81,6 +81,21 @@ class PermissionsController {
           error: "Usuário não encontrado"
         })
       }
+    }
+
+    if(name) {
+      const skip = page ? ((Number(page) - 1) * take) : 0 
+      const limit = page ? take : 99999999
+      const items = await permissionsRepository.createQueryBuilder("permissions")
+        .leftJoinAndSelect("permissions.systemUser", "systemUser")
+        .where("systemUser.name like :name", { name: `%${name}%` })
+        .skip(skip)
+        .take(limit)
+        .getManyAndCount()
+      return response.status(200).json({
+        systemUsers: items[0],
+        totalSystemUsers: items[1],
+      })
     }
 
     const permissionsList = await permissionsRepository.findAndCount(options)
