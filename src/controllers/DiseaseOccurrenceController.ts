@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getCustomRepository, IsNull } from "typeorm";
+import { getCustomRepository, IsNull, Like } from "typeorm";
 
 import { DiseaseOccurrence, Patient, SymptomOccurrence } from "../models";
 import { 
@@ -155,64 +155,74 @@ class DiseaseOccurrenceController {
     const {
       id,
       patient_id,
+      patient_name,
       disease_name,
-      status
+      status,
+      page
     } = request.query
+    const take = 10
+    let filters = {}
 
     const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
     const patientRepository = getCustomRepository(PatientsRepository)
     const diseaseRepository = getCustomRepository(DiseaseRepository)
-    let filters = {}
+
+    if(patient_name) {
+      const skip = page ? ((Number(page) - 1) * take) : 0 
+      const limit = page ? take : 99999999
+      const items = await diseaseOccurrenceRepository.createQueryBuilder("disease_occurrence")
+        .leftJoinAndSelect("disease_occurrence.patient", "patients")
+        .where("patients.name like :name", { name: `%${patient_name}%` })
+        .skip(skip)
+        .take(limit)
+        .getManyAndCount()
+      return response.status(200).json({
+        diseaseOccurrences: items[0],
+        totalDiseaseOccurrences: items[1],
+      })
+    }
 
     if(id) {
       filters = { ...filters, id: String(id) }
-
-      const isValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
-        id: String(id)
-      })
-
-      if(!isValidDiseaseOccurrence){
-        return response.status(404).json({
-          error: "Ocorrência de doença não encontrada"
-        })
-      }
     }
 
     if(patient_id) {
       filters = { ...filters, patient_id: String(patient_id) }
-
-      const isValidPatient = await patientRepository.findOne({
-        id: String(patient_id)
-      })
-  
-      if(!isValidPatient){
-        return response.status(404).json({
-          error: "Paciente não encontrado"
-        })
-      }
     }
 
     if(disease_name) {
-      filters = { ...filters, disease_name: String(disease_name) }
-
-      const isValidDisease = await diseaseRepository.findOne({
-        name: String(disease_name)
-      })
-  
-      if (!isValidDisease){
-        return response.status(404).json({
-          error: "Doença não encontrada"
-        })
-      }
+      filters = { ...filters, disease_name: Like(`%${String(disease_name)}%`)  }
     }
 
     if(status) {
-      filters = { ...filters, status: String(status) }
+      filters = { ...filters, status: Like(`%${String(status)}%`) }
     }
 
-    const diseaseOccurrences = await diseaseOccurrenceRepository.find(filters)
+    let options: any = {
+      where: filters,
+      relations: ["patient"]
+    }
+
+    if(page) {
+      options = { ...options, take, skip: ((Number(page) - 1) * take) }
+    }
+
+    const diseaseOccurrences = await diseaseOccurrenceRepository.findAndCount(options)
+
+    const filteredDiseaseOccurences = diseaseOccurrences[0].map(occurrence => {
+      return {
+        ...occurrence,
+        patient: {
+          name: occurrence.patient.name,
+          email: occurrence.patient.email
+        }
+      }
+    })
   
-    return response.status(200).json(diseaseOccurrences)
+    return response.status(200).json({
+      diseaseOccurrences: filteredDiseaseOccurences,
+      totalDiseaseOccurrences: diseaseOccurrences[1]
+    })
   }
 
   async alterOne(request: Request, response: Response) {

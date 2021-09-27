@@ -25,6 +25,7 @@ class PatientController{
       throw new PatientAlreadyExistsError()
     }
 
+    body.status = "Saudável"
     body.createdAt = new Date()
 
     try {

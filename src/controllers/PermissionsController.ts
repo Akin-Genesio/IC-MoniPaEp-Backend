@@ -47,8 +47,8 @@ class PermissionsController {
     }
   }
 
-  async list (request: Request, response: Response) {
-    const { id, page, name, department } = request.query
+  async list(request: Request, response: Response) {
+    const { id, page, name } = request.query
     const take = 10
     let filters = {}
     
@@ -68,7 +68,6 @@ class PermissionsController {
       options = { ...options, take, skip: ((Number(page) - 1) * take) }
     }
 
-    
     if(id) {
       filters = { ...filters, userId: String(id) }
 
