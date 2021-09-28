@@ -77,16 +77,22 @@ class AssignedHealthProtocolController {
     if(healthprotocol_description) {
       const skip = page ? ((Number(page) - 1) * take) : 0 
       const limit = page ? take : 99999999
-      const items = await assignedHealthProtocolRepository.createQueryBuilder("assigned_healthprotocol")
-        .leftJoinAndSelect("assigned_healthprotocol.healthprotocol", "healthProtocols")
-        .where("healthProtocols.description like :description", { description: `%${healthprotocol_description}%` })
-        .skip(skip)
-        .take(limit)
-        .getManyAndCount()
-      return response.status(200).json({
-        assignedHealthProtocols: items[0],
-        totalAssignedHealthProtocols: items[1],
-      })
+      try {
+        const items = await assignedHealthProtocolRepository.createQueryBuilder("assigned_healthprotocol")
+          .leftJoinAndSelect("assigned_healthprotocol.healthprotocol", "healthProtocols")
+          .where("healthProtocols.description like :description", { description: `%${healthprotocol_description}%` })
+          .skip(skip)
+          .take(limit)
+          .getManyAndCount()
+        return response.status(200).json({
+          assignedHealthProtocols: items[0],
+          totalAssignedHealthProtocols: items[1],
+        })
+      } catch (error) {
+        return response.status(403).json({
+          error: "Erro na listagem das associações"
+        })
+      }
     }
 
     let options: any = {

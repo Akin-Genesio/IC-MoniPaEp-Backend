@@ -89,6 +89,54 @@ class SymptomOccurrenceController {
     }
   }
 
+  async getUnassignedOccurrences(request: Request, response: Response) {
+    const { page, patient_name } = request.query
+    const take = 10
+    const skip = page ? ((Number(page) - 1) * take) : 0 
+
+    const symptomOccurrenceRepository = getCustomRepository(SymptomOccurrenceRepository)
+
+    let whereConditions = "symptom_occurrence.disease_occurrence_id IS NULL"
+    let whereParameters = {}
+
+    if(patient_name) {
+      whereConditions += " AND patients.name like :name"
+      whereParameters = { name: `%${patient_name}%` }
+    }
+    try {
+      const items = await symptomOccurrenceRepository.createQueryBuilder("symptom_occurrence")
+        .addSelect("MIN(symptom_occurrence.registered_date)", "registered_date")
+        .leftJoinAndSelect("symptom_occurrence.patient", "patients")
+        .where(whereConditions, whereParameters)
+        .groupBy("symptom_occurrence.patient_id")
+        .orderBy('symptom_occurrence.registered_date', 'DESC')
+        .addOrderBy('symptom_occurrence.registered_date', 'ASC')
+        .getManyAndCount()
+      
+      const paginatedEnd = page ? Math.min(skip + take, items[0].length) : items[0].length 
+
+      const paginatedItems = items[0].slice(skip, paginatedEnd)
+
+      const formattedData = paginatedItems.map(occurrence => {
+        return {
+          ...occurrence,
+          patient: {
+            name: occurrence.patient.name,
+            email: occurrence.patient.email
+          }
+        }
+      })
+      return response.status(200).json({
+        symptomOccurrences: formattedData,
+        totalSymptomOccurrences: items[0].length,
+      })
+    } catch (error) {
+      return response.status(403).json({
+        error: "Erro na listagem das ocorrências de sintomas"
+      })
+    }
+  }
+
   async list(request: Request, response: Response) {
     const { 
       id,

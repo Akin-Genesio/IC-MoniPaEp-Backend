@@ -164,22 +164,37 @@ class DiseaseOccurrenceController {
     let filters = {}
 
     const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
-    const patientRepository = getCustomRepository(PatientsRepository)
-    const diseaseRepository = getCustomRepository(DiseaseRepository)
 
     if(patient_name) {
       const skip = page ? ((Number(page) - 1) * take) : 0 
       const limit = page ? take : 99999999
-      const items = await diseaseOccurrenceRepository.createQueryBuilder("disease_occurrence")
-        .leftJoinAndSelect("disease_occurrence.patient", "patients")
-        .where("patients.name like :name", { name: `%${patient_name}%` })
-        .skip(skip)
-        .take(limit)
-        .getManyAndCount()
-      return response.status(200).json({
-        diseaseOccurrences: items[0],
-        totalDiseaseOccurrences: items[1],
-      })
+      try {
+        const items = await diseaseOccurrenceRepository.createQueryBuilder("disease_occurrence")
+          .leftJoinAndSelect("disease_occurrence.patient", "patients")
+          .where("patients.name like :name", { name: `%${patient_name}%` })
+          .skip(skip)
+          .take(limit)
+          .orderBy('disease_occurrence.date_end', 'ASC')
+          .addOrderBy('disease_occurrence.status', 'ASC')
+          .getManyAndCount()
+        const formattedData = items[0].map(occurrence => {
+          return {
+            ...occurrence,
+            patient: {
+              name: occurrence.patient.name,
+              email: occurrence.patient.email
+            }
+          }
+        })
+        return response.status(200).json({
+          diseaseOccurrences: formattedData,
+          totalDiseaseOccurrences: items[1],
+        })
+      } catch (error) {
+        return response.status(404).json({
+          error: "Erro na listagem de ocorrências de doenças"
+        })
+      }
     }
 
     if(id) {
@@ -200,7 +215,11 @@ class DiseaseOccurrenceController {
 
     let options: any = {
       where: filters,
-      relations: ["patient"]
+      relations: ["patient"],
+      order: {
+        date_end: 'ASC',
+        status: 'ASC'
+      }
     }
 
     if(page) {

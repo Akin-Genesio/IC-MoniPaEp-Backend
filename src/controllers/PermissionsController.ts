@@ -85,16 +85,22 @@ class PermissionsController {
     if(name) {
       const skip = page ? ((Number(page) - 1) * take) : 0 
       const limit = page ? take : 99999999
-      const items = await permissionsRepository.createQueryBuilder("permissions")
-        .leftJoinAndSelect("permissions.systemUser", "systemUser")
-        .where("systemUser.name like :name", { name: `%${name}%` })
-        .skip(skip)
-        .take(limit)
-        .getManyAndCount()
-      return response.status(200).json({
-        systemUsers: items[0],
-        totalSystemUsers: items[1],
-      })
+      try {
+        const items = await permissionsRepository.createQueryBuilder("permissions")
+          .leftJoinAndSelect("permissions.systemUser", "systemUser")
+          .where("systemUser.name like :name", { name: `%${name}%` })
+          .skip(skip)
+          .take(limit)
+          .getManyAndCount()
+        return response.status(200).json({
+          systemUsers: items[0],
+          totalSystemUsers: items[1],
+        })
+      } catch (error) {
+        return response.status(403).json({
+          error: "Erro na listagem de permissões"
+        })
+      }
     }
 
     const permissionsList = await permissionsRepository.findAndCount(options)
