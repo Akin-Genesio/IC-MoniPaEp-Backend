@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getCustomRepository, In } from "typeorm";
+import { getCustomRepository, In, IsNull } from "typeorm";
 
 import { SymptomOccurrence } from "../models";
 import { 
@@ -143,6 +143,7 @@ class SymptomOccurrenceController {
       patient_id, 
       symptom_name, 
       disease_occurrence_id,
+      unassigned
     } = request.query
 
     const symptomOccurrenceRepository = getCustomRepository(SymptomOccurrenceRepository)
@@ -206,7 +207,17 @@ class SymptomOccurrenceController {
         })
       }
     }
-    const occurrencesList = await symptomOccurrenceRepository.find(filters)
+
+    if(unassigned) {
+      filters = { ...filters, disease_occurrence_id: IsNull() }
+    }
+
+    const occurrencesList = await symptomOccurrenceRepository.find({
+      where: filters,
+      order: {
+        registered_date: 'DESC'
+      }
+    })
 
     return response.status(200).json(occurrencesList)
   }

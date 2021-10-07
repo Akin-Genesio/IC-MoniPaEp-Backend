@@ -6,12 +6,15 @@ import {
   DiseaseOccurrenceRepository, 
   DiseaseRepository, 
   PatientsRepository, 
+  PatientMovementHistoryRepository,
   SymptomOccurrenceRepository 
 } from "../repositories";
 
 class DiseaseOccurrenceController {
   async create(request: Request, response: Response) {
     const body = request.body
+
+    console.log(body)
 
     const patientsRepository = getCustomRepository(PatientsRepository)
     const diseasesRepository = getCustomRepository(DiseaseRepository)
@@ -174,7 +177,7 @@ class DiseaseOccurrenceController {
           .where("patients.name like :name", { name: `%${patient_name}%` })
           .skip(skip)
           .take(limit)
-          .orderBy('disease_occurrence.date_end', 'ASC')
+          .orderBy('disease_occurrence.date_start', 'DESC')
           .addOrderBy('disease_occurrence.status', 'ASC')
           .getManyAndCount()
         const formattedData = items[0].map(occurrence => {
@@ -217,7 +220,7 @@ class DiseaseOccurrenceController {
       where: filters,
       relations: ["patient"],
       order: {
-        date_end: 'ASC',
+        date_start: 'DESC',
         status: 'ASC'
       }
     }
@@ -241,6 +244,41 @@ class DiseaseOccurrenceController {
     return response.status(200).json({
       diseaseOccurrences: filteredDiseaseOccurences,
       totalDiseaseOccurrences: diseaseOccurrences[1]
+    })
+  }
+
+  async listDiseaseDetails(request: Request, response: Response) {
+    const { id } = request.params
+
+    const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
+    const symptomOccurrenceRepository = getCustomRepository(SymptomOccurrenceRepository)
+    const movementHistoryRepository = getCustomRepository(PatientMovementHistoryRepository)
+
+    const diseaseOccurrenceDetails = await diseaseOccurrenceRepository.findOne({
+      where: { id },
+    })
+
+    if(!diseaseOccurrenceDetails) {
+      return response.status(404).json({
+        error: "Ocorrência de doença não encontrada"
+      })
+    }
+
+    const movementHistory = await movementHistoryRepository.find({
+      where: { disease_occurrence_id: id },
+    })
+
+    const symptomOccurrencesList = await symptomOccurrenceRepository.find({
+      where: { disease_occurrence_id: id },
+      order: {
+        registered_date: 'DESC'
+      }
+    })
+
+    return response.status(200).json({
+      occurrenceDetails: diseaseOccurrenceDetails,
+      symptomsList: symptomOccurrencesList,
+      movementHistory
     })
   }
 
