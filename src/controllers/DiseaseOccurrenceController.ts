@@ -358,7 +358,7 @@ class DiseaseOccurrenceController {
         }
       }
       return response.status(200).json({
-        message: "Ocorrência de doença atualizada"
+        success: "Ocorrência de doença atualizada"
       })
     } catch (error) {
       return response.status(404).json({
@@ -430,7 +430,7 @@ class DiseaseOccurrenceController {
       }
 
       return response.status(200).json({
-        message: "Ocorrência de doença deletada"
+        success: "Ocorrência de doença deletada"
       })
     } catch (error) {
       return response.status(404).json({
