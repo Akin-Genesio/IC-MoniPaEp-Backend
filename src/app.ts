@@ -1,16 +1,23 @@
 import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors'
-import 'reflect-metadata'
-import 'express-async-errors'
+import { scheduleJob } from 'node-schedule'
 import createConnection from'./database'
 import { router } from './routes';
 import { AppError } from './errors';
+import { verifyOccurrencesExpiration } from './scheduledJobs';
+import 'reflect-metadata'
+import 'express-async-errors'
 
 const app = express();
 createConnection()
 app.use(cors())
 app.use(express.json())
 app.use(router);
+
+scheduleJob('0 1 * * *', verifyOccurrencesExpiration)
+scheduleJob('*/2 * * * * *', () => {
+  console.log('Ran at ', new Date())
+})
 
 //Errors  treatment
 app.use((err: Error, request: Request, response: Response, _next: NextFunction) => {
