@@ -14,10 +14,10 @@ app.use(cors())
 app.use(express.json())
 app.use(router);
 
-scheduleJob('0 1 * * *', verifyOccurrencesExpiration)
-scheduleJob('*/2 * * * * *', () => {
-  console.log('Ran at ', new Date())
-})
+//scheduleJob('0 1 * * *', verifyOccurrencesExpiration)
+// scheduleJob('*/2 * * * * *', () => {
+//   console.log('Ran at ', new Date())
+// })
 
 //Errors  treatment
 app.use((err: Error, request: Request, response: Response, _next: NextFunction) => {

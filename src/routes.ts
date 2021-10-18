@@ -56,6 +56,7 @@ router.get("/systemuser/login", systemUserController.login)//geral
 router.get("/systemuser", jwt.authMiddleware, jwt.localAdminMiddleware, systemUserController.list)//adm e adm local
 router.get("/systemuser/me", jwt.authMiddleware, jwt.systemUserMiddleware, systemUserController.getOneWithToken)//funcionario autenticado
 router.put("/systemuser/:id", jwt.authMiddleware, jwt.systemUserMiddleware, systemUserController.alterOne)//funcionario autenticado*
+router.put("/systemuser/password/:id", jwt.authMiddleware, jwt.systemUserMiddleware, systemUserController.updatePassword)//funcionario autenticado*
 router.delete("/systemuser/:id", jwt.authMiddleware, jwt.localAdminMiddleware, systemUserController.deleteOne)//adm e adm local
 
 //Patient Routes

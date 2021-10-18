@@ -256,6 +256,56 @@ class SystemUserController {
     })
   }
 
+  async updatePassword(request, response: Response) {
+    const tokenPayload = request.tokenPayload
+    const { current_password, new_password } = request.body
+    const { id } = request.params
+
+    if(id !== tokenPayload.id || current_password === undefined || new_password === undefined){
+      return response.status(401).json({
+        error: "Operação proibida"
+      })
+    }
+
+    const systemUserRepository = getCustomRepository(SystemUserRepository)
+    
+    const userExists = await systemUserRepository.findOne({
+      where: { id }, 
+      select: ['password']
+    })
+    
+    if (!userExists) {
+      return response.status(401).json({
+        error: "Usuário inválido."
+      })
+    }
+
+    const isValidPassword = await bcrypt.compare(current_password, userExists.password)
+
+    if(!isValidPassword) {
+      return response.status(400).json({
+        error: "Senha atual inválida."
+      })
+    }
+
+    const newPasswordHash = await bcrypt.hash(new_password, 10)
+    
+    try {
+      await systemUserRepository.createQueryBuilder()
+        .update(SystemUser)
+        .set({ password: newPasswordHash })
+        .where("id = :id", { id })
+        .execute()
+      return response.status(200).json({
+        success: "Senha atualizada com sucesso."
+      })
+    } catch (error) {
+      return response.status(403).json({
+        error: "Erro na atualização da senha."
+      })
+    }
+  }
+
   async alterOne(request: Request, response: Response) {
     const body = request.body
     const { id } = request.params
