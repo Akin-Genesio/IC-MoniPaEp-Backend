@@ -12,10 +12,15 @@ export class HealthProtocol1617234652026 implements MigrationInterface {
             isPrimary: true
           },
           {
+            name: "title",
+            type: "varchar",
+            isNullable: false
+          },
+          {
             name: "description",
             type: "varchar",
             isNullable: false
-          }
+          },
         ],
       })
     )

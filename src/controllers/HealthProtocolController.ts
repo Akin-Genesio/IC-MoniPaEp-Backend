@@ -9,7 +9,7 @@ class HealthProtocolController {
 
     const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
     const isAlreadyRegistered = await healthProtocolRepository.findOne({
-      description: body.description
+      title: body.title
     })
 
     if (isAlreadyRegistered) {
@@ -34,14 +34,12 @@ class HealthProtocolController {
   }
 
   async list(request: Request, response: Response){
-    const { id, page, description } = request.query
+    const { id, page, title, description } = request.query
     let filters = {}
     
     const healthProtocolRepository = getCustomRepository(HealthProtocolRepository)
 
     if(id) {
-      filters = { id: String(id) }
-
       const isValidHealthProtocol = await healthProtocolRepository.findOne({
         id: String(id)
       })
@@ -59,9 +57,14 @@ class HealthProtocolController {
       filters = { description: Like(`%${String(description)}%`) }
     } 
 
+    if(title) {
+      filters = { title: Like(`%${String(title)}%`) }
+    } 
+
     let options: any = {
       where: filters,
       order: {
+        title: 'ASC',
         description: 'ASC'
       },
     }
@@ -94,7 +97,7 @@ class HealthProtocolController {
     }
 
     const isAlreadyRegistered = await healthProtocolRepository.findOne({
-      description: body.description
+      title: body.title
     })
 
     if (isAlreadyRegistered) {

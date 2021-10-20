@@ -7,6 +7,9 @@ class HealthProtocol{
   readonly id: string;
   
   @Column()
+  title: string;
+
+  @Column()
   description: string;
 
   constructor(){
