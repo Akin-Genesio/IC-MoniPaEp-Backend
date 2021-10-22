@@ -58,7 +58,12 @@ class FAQController{
       filters = { ...filters, question: Like(`%${String(question)}%`) }
     }
 
-    const questionsList = await faqRepository.findAndCount(filters)
+    const questionsList = await faqRepository.findAndCount({
+      where: filters,
+      order: {
+        question: "ASC"
+      }
+    })
   
     return response.status(200).json({
       faqs: questionsList[0],

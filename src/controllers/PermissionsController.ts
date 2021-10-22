@@ -129,7 +129,6 @@ class PermissionsController {
     }
 
     if(body.generalAdm !== undefined) {
-      console.log(tokenPayload)
       const tokenUser = await permissionsRepository.findOne({
         userId: tokenPayload.id
       })

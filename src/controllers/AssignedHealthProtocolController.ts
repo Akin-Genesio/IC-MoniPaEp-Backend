@@ -63,8 +63,7 @@ class AssignedHealthProtocolController {
     const { 
       disease_name, 
       healthprotocol_id, 
-      healthprotocol_title, 
-      healthprotocol_description, 
+      healthprotocol_title,
       page 
     } = request.query
     const take = 10
@@ -80,20 +79,13 @@ class AssignedHealthProtocolController {
       filters = { ...filters, healthprotocol_id: String(healthprotocol_id) }
     }
 
-    if(healthprotocol_description || healthprotocol_title) {
-      let body: any = {}
-      if(healthprotocol_title) {
-        body = { ...body, title: `%${healthprotocol_title}%` }
-      }
-      if(healthprotocol_description) {
-        body = { ...body, description: `%${healthprotocol_description}%` }
-      }
+    if(healthprotocol_title) {
       const skip = page ? ((Number(page) - 1) * take) : 0 
       const limit = page ? take : 99999999
       try {
         const items = await assignedHealthProtocolRepository.createQueryBuilder("assigned_healthprotocol")
           .leftJoinAndSelect("assigned_healthprotocol.healthprotocol", "healthProtocols")
-          .where("healthProtocols.description like :description", body)
+          .where("healthProtocols.title like :title", { title: `%${healthprotocol_title}%` })
           .skip(skip)
           .take(limit)
           .getManyAndCount()

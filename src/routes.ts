@@ -53,7 +53,7 @@ router.delete("/permissions/:id", jwt.authMiddleware, jwt.localAdminMiddleware, 
 
 router.post("/systemuser/signup", systemUserController.create) //geral *login ira verificar se esta autorizado
 router.get("/systemuser/login", systemUserController.login)//geral
-router.get("/systemuser", jwt.authMiddleware, jwt.localAdminMiddleware, systemUserController.list)//adm e adm local
+router.get("/systemuser", jwt.authMiddleware, jwt.systemUserMiddleware, systemUserController.list)//funcionario autenticado*
 router.get("/systemuser/me", jwt.authMiddleware, jwt.systemUserMiddleware, systemUserController.getOneWithToken)//funcionario autenticado
 router.put("/systemuser/:id", jwt.authMiddleware, jwt.systemUserMiddleware, systemUserController.alterOne)//funcionario autenticado*
 router.put("/systemuser/password/:id", jwt.authMiddleware, jwt.systemUserMiddleware, systemUserController.updatePassword)//funcionario autenticado*

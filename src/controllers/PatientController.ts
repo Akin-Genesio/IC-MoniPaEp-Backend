@@ -142,6 +142,7 @@ class PatientController{
       id, 
       name,
       cpf,
+      gender,
       neighborhood,
       status, 
       active, 
@@ -182,6 +183,10 @@ class PatientController{
 
     if(cpf) {
       filters = { ...filters, CPF: Like(`%${String(cpf)}%`)}
+    }
+
+    if(gender) {
+      filters = { ...filters, gender: Like(`%${String(gender)}%`)}
     }
 
     if(neighborhood) {

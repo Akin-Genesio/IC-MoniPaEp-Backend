@@ -20,6 +20,9 @@ class Patient{
   email: string;
 
   @Column()
+  gender: string;
+
+  @Column()
   phone: string;
 
   @Column()

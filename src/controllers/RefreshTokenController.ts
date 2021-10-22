@@ -97,6 +97,13 @@ class RefreshTokenController {
           })
         }
 
+        if(!userPermissions.authorized) {
+          return response.status(401).json({
+            error: "Usuário desautorizado",
+            code: "refresh.token.generation"
+          })
+        }
+
         const permissions: string[] = []
         const roles: string[] = ['system.user']
 
