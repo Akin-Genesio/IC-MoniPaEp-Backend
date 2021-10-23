@@ -23,9 +23,7 @@ const router = Router()
 
 const patientController = new PatientController();
 const faqController = new FAQController()
-const appointmentController = new AppointmentController()
 const usmController = new USMController()
-const vaccineController = new VaccineController()
 const diseaseController = new DiseaseController()
 const healthProtocolController = new HealthProtocolController()
 const assignedHealthProtocolController = new AssignedHealthProtocolController()
@@ -37,6 +35,8 @@ const systemUserController = new SystemUserController()
 const permissionsController = new PermissionsController()
 const faqSuggestionsController = new FAQSuggestionsController()
 const refreshTokenController = new RefreshTokenController()
+//const appointmentController = new AppointmentController()
+//const vaccineController = new VaccineController()
 
 //Refresh Token Routes
 
@@ -66,7 +66,7 @@ router.get("/patients", jwt.authMiddleware, jwt.systemUserMiddleware, patientCon
 router.get("/patients/me", jwt.authMiddleware, patientController.getOneWithToken) //geral autenticado*
 router.put("/patients/:id", jwt.authMiddleware, patientController.alterOne) //geral autenticado*
 router.put("/patients/deactivate/:id", jwt.authMiddleware, patientController.deactivateAccount) //geral autenticado*
-router.delete("/patients/:id", jwt.authMiddleware, jwt.systemUserMiddleware, patientController.deleteOne) //funcionarios autenticados
+router.delete("/patients/:id", jwt.authMiddleware, jwt.adminMiddleware, patientController.deleteOne) //funcionarios autenticados
 
 //USM Routes
 router.post("/usm", jwt.authMiddleware, jwt.adminMiddleware, usmController.create)//adm e adm local
