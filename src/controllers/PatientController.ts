@@ -26,6 +26,7 @@ class PatientController{
     }
 
     body.createdAt = new Date()
+    body.lastUpdate = body.createdAt
 
     try {
       const patientBody = patientsRepository.create(body)

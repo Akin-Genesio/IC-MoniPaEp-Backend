@@ -55,12 +55,18 @@ class Patient{
     @Column()
     createdAt: Date;
 
+    @Column()
+    lastUpdate: Date;
+
     constructor(){
         if(!this.id){
             this.id = uuid();
         }
         if(!this.activeAccount){
             this.activeAccount = true;
+        }
+        if(!this.status){
+            this.status = 'Saudável';
         }
     }
 

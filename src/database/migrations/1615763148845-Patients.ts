@@ -75,7 +75,7 @@ export class Patients1615763148845 implements MigrationInterface {
           {
             name: "status",
             type: "varchar",
-            isNullable: true
+            isNullable: false
           },
           {
             name: "activeAccount",
@@ -84,6 +84,10 @@ export class Patients1615763148845 implements MigrationInterface {
           },
           {
             name: "createdAt",
+            type: "datetime"
+          },
+          {
+            name: "lastUpdate",
             type: "datetime"
           }
         ]
