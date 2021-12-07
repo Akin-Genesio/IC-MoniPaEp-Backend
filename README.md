@@ -29,7 +29,7 @@
 ## 💬 Funcionalidades até o momento
 <ul>
   <li>Gerenciamento de permissões por meio de JWT e refresh tokens</li>
-  <li>Gerenciamento dePpacientes</li>
+  <li>Gerenciamento de Pacientes</li>
   <li>Gerenciamento de funcionários</li>
   <li>Gerenciamento de Sintomas</li>
   <li>Gerenciamento de Doenças</li>
