@@ -14,7 +14,7 @@
   <a href="#Tecnologias utilizadas">Tecnologias utilizadas</a> •
 </p>
 
-![](https://github.com/vinicius-claus/IC-MoniPaEp-Backend/blob/main/bd.png)
+![](https://github.com/vinicius-claus/IC-MoniPaEp-Backend/blob/production/bd.png)
 
 
 ## 🚀 Como executar
