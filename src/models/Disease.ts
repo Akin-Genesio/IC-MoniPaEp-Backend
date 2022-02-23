@@ -1,18 +1,15 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
 
- 
  @Entity("Disease")
  class Disease {
-    @PrimaryColumn()
-    name: string;
+  @PrimaryColumn()
+  name: string;
 
-    @Column()
-    infected_Monitoring_Days: number;
+  @Column()
+  infected_Monitoring_Days: number;
 
-    @Column()
-    suspect_Monitoring_Days: number;
-
-
+  @Column()
+  suspect_Monitoring_Days: number;
  }
 
- export{Disease}
+ export { Disease }

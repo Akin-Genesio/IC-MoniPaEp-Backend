@@ -5,37 +5,40 @@ import { Patient } from "./Patient";
 
 @Entity("disease_occurrence")
 class DiseaseOccurrence {
-    @PrimaryColumn()
-    readonly id: string
+  @PrimaryColumn()
+  readonly id: string
 
-    @Column()
-    date_start: Date
+  @Column()
+  patient_id: string
 
-    @Column()
-    diagnosis: string
+  @Column()
+  disease_name: string
 
-    @Column()
-    disease_name: string
+  @Column()
+  diagnosis: string
 
-    @ManyToOne(() => Disease)
-    @JoinColumn({name: "disease_name"})
-    Disease: Disease
+  @Column()
+  date_start: Date
 
-    @Column()
-    status: string
+  @Column()
+  date_end: Date
 
-    @Column()
-    patient_id: string
+  @Column()
+  status: string
 
-    @ManyToOne(() => Patient)
-    @JoinColumn({name: "patient_id"})
-    patient: Patient
+  @ManyToOne(() => Patient)
+  @JoinColumn({ name: "patient_id" })
+  patient: Patient
 
-    constructor(){
-        if(!this.id){
-            this.id = uuid();
-        }
+  @ManyToOne(() => Disease)
+  @JoinColumn({ name: "disease_name" })
+  Disease: Disease
+
+  constructor(){
+    if(!this.id){
+      this.id = uuid();
     }
+  }
 }
 
 export { DiseaseOccurrence }

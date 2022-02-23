@@ -1,63 +1,65 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryColumn } from "typeorm";
-import {v4 as uuid} from 'uuid'
+import { v4 as uuid } from 'uuid'
 import bcrypt from 'bcrypt'
 
 @Entity("patients")
 class Patient{
-    @PrimaryColumn()
-    readonly id: string;
+  @PrimaryColumn()
+  readonly id: string;
 
-    @Column()
-    name: string;
+  @Column()
+  name: string;
 
-    @Column({select: false})
-    password: string;
+  @Column({ select: false })
+  password: string;
 
-    @Column()
-    CPF: string;
+  @Column()
+  CPF: string;
 
-    @Column()
-    email: string;
+  @Column()
+  email: string;
 
-    @Column()
-    phone: string;
+  @Column()
+  gender: string;
 
-    @Column()
-    lastGPSLocation?: string;
+  @Column()
+  phone: string;
 
-    @Column()
-    allowSMS: boolean;
+  @Column()
+  lastGPSLocation?: string;
 
-    @Column()
-    workAddress?: string;
+  @Column()
+  allowSMS: boolean;
 
-    @Column()
-    homeAddress: string;
+  @Column()
+  workAddress?: string;
 
-    @Column()
-    neighborhood: string;
+  @Column()
+  homeAddress: string;
 
-    @Column()
-    hasHealthPlan: boolean;
+  @Column()
+  neighborhood: string;
 
-    @Column()
-    houseNumber: number;
+  @Column()
+  hasHealthPlan: boolean;
 
-    @Column()
-    birthdate: Date;
+  @Column()
+  houseNumber: number;
 
-    @Column()
-    status?: string;
+  @Column()
+  birthdate: Date;
 
-    @Column()
-    readonly activeAccount: boolean;
+  @Column()
+  status?: string;
 
-    @Column()
-    createdAt: Date;
+  @Column()
+  readonly activeAccount: boolean;
 
     @Column()
     lastUpdate: Date;
 
+    @Column()
+    createdAt: Date;
     constructor(){
         if(!this.id){
             this.id = uuid();
@@ -69,13 +71,14 @@ class Patient{
             this.status = 'Saudável';
         }
     }
+ 
 
-    @BeforeInsert()
-    @BeforeUpdate()
-    async hashPassword(): Promise<void> {
-        const hash = await bcrypt.hash(this.password, 10)
-        this.password = hash
-    }
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPassword(): Promise<void> {
+    const hash = await bcrypt.hash(this.password, 10)
+    this.password = hash
+  }
 }
 
-export {Patient}
+export { Patient }

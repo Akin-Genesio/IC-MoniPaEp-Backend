@@ -9,106 +9,81 @@ class PatientMovementHistoryController {
     const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
     const patientMovementRepository = getCustomRepository(PatientMovementHistoryRepository)
 
-    const IsValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
+    const isValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
       id: body.disease_occurrence_id
     })
 
-    if (!IsValidDiseaseOccurrence) {
+    if (!isValidDiseaseOccurrence) {
       return response.status(404).json({
-        error: "Disease occurrence id is not valid!"
+        error: "Ocorrência de doença não encontrada"
       })
     }
 
     try {
-      const patientMovementHistory = patientMovementRepository.create(body)
-      await patientMovementRepository.save(patientMovementHistory)
+      const patientMovementHistoryBody = patientMovementRepository.create(body)
+      const patientMovementHistory = await patientMovementRepository.save(patientMovementHistoryBody)
   
-      return response.status(201).json(patientMovementHistory)
+      return response.status(201).json({
+        success: "Histórico de movimentação registrado com sucesso",
+        patientMovementHistory
+      })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro no registro do histórico de movimentação"
       })
     }
   }
 
   async list(request: Request, response: Response) {
-    const {disease_occurrence_id, description} = request.query
+    const { disease_occurrence_id, id } = request.query
+
     const patientMovementRepository = getCustomRepository(PatientMovementHistoryRepository)
-    
-    if(!disease_occurrence_id && !description) {
-      const movementHistory = await patientMovementRepository.find()
-      return response.status(200).json(movementHistory)
-    } else if (disease_occurrence_id && !description) {
-      const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
+    let filters = {}
 
-      const isValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
-        id: String(disease_occurrence_id)
+    if(id) {
+      filters = { ...filters, id: String(id) }
+
+      const isValidPatientMovementHistory = await patientMovementRepository.findOne({
+        id: String(id)
       })
 
-      if (!isValidDiseaseOccurrence) {
+      if (!isValidPatientMovementHistory) {
         return response.status(404).json({
-          error: "Disease occurrence is not valid"
+          error: "Histórico de movimentação não encontrado"
         })
       }
-
-      const movementHistoryList = await patientMovementRepository.find({
-        disease_occurrence_id: String(disease_occurrence_id)
-      })
-
-      return response.status(200).json(movementHistoryList)
-    } else if(!disease_occurrence_id && description) {          
-      const movementHistoryList = await patientMovementRepository.find({
-        description: String(description)
-      })
-
-      return response.status(200).json(movementHistoryList)
-    } else {
-      const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
-
-      const isValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
-        id: String(disease_occurrence_id)
-      })
-
-      if (!isValidDiseaseOccurrence) {
-        return response.status(404).json({
-          error: "Disease occurrence is not valid"
-        })
-      }
-
-      const movementHistoryItem = await patientMovementRepository.findOne({
-        disease_occurrence_id: String(disease_occurrence_id),
-        description: String(description)
-      })
-
-      return response.status(200).json(movementHistoryItem)
     }
+
+    if(disease_occurrence_id) {
+      filters = { ...filters, disease_occurrence_id: String(disease_occurrence_id) }
+
+      const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
+      const isValidDiseaseOccurrence = await diseaseOccurrenceRepository.findOne({
+        id: String(disease_occurrence_id)
+      })
+  
+      if (!isValidDiseaseOccurrence) {
+        return response.status(404).json({
+          error: "Ocorrência de doença não encontrada"
+        })
+      }
+    }
+    const movementHistoryItems = await patientMovementRepository.find(filters)
+
+    return response.status(200).json(movementHistoryItems)
   }
 
   async alterOne(request: Request, response: Response) {
     const body = request.body
-    const {disease_occurrence_id, description} = request.params
+    const { id } = request.params
             
     const patientMovementRepository = getCustomRepository(PatientMovementHistoryRepository)
-    const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
 
-    const isValidId = await diseaseOccurrenceRepository.findOne({
-      id: disease_occurrence_id
-    })
+    const isValidMovement = await patientMovementRepository.findOne({ id })
 
-    if(!isValidId) {
+    if(!isValidMovement) {
       return response.status(404).json({
-        error: "Disease occurrence is not valid"
-      })
-    }
-
-    const isValidDescription = await patientMovementRepository.findOne({
-      disease_occurrence_id: disease_occurrence_id,
-      description: description
-    })
-
-    if(!isValidDescription) {
-      return response.status(404).json({
-        error: "Movement history not found for this disease occurrence"
+        error: "Histórico de movimentação não encontrado"
       })
     }
 
@@ -116,41 +91,28 @@ class PatientMovementHistoryController {
       await patientMovementRepository.createQueryBuilder()
         .update(PatientMovementHistory)
         .set(body)
-        .where("disease_occurrence_id = :disease_occurrence_id and description = :description", 
-            {disease_occurrence_id: disease_occurrence_id, description: description})
+        .where("id = :id", { id })
         .execute()
-      return response.status(200).json(body)
+      return response.status(200).json({
+        success: "Histórico de movimentação alterado com sucesso",
+      })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na atualização do histórico de movimentação"
       })
     }
   }
 
   async deleteOne(request: Request, response: Response) {
-    const {disease_occurrence_id, description} = request.params
+    const { id } = request.params
             
     const patientMovementRepository = getCustomRepository(PatientMovementHistoryRepository)
-    const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
 
-    const isValidId = await diseaseOccurrenceRepository.findOne({
-      id: disease_occurrence_id
-    })
+    const isValidMovement = await patientMovementRepository.findOne({ id })
 
-    if(!isValidId) {
+    if(!isValidMovement) {
       return response.status(404).json({
-        error: "Disease occurrence is not valid"
-      })
-    }
-
-    const isValidDescription = await patientMovementRepository.findOne({
-      disease_occurrence_id: disease_occurrence_id,
-      description: description
-    })
-
-    if(!isValidDescription) {
-      return response.status(404).json({
-        error: "Movement history not found for this disease occurrence"
+        error: "Histórico de movimentação não encontrado"
       })
     }
 
@@ -158,15 +120,14 @@ class PatientMovementHistoryController {
       await patientMovementRepository.createQueryBuilder()
         .delete()
         .from(PatientMovementHistory)
-        .where("disease_occurrence_id = :disease_occurrence_id and description = :description", 
-            {disease_occurrence_id: disease_occurrence_id, description: description})
+        .where("id = :id", { id })
         .execute()
       return response.status(200).json({
-        message: "Movement history for this disease occurrence deleted!"
+        success: "Histórico de movimentação deletado com sucesso"
       })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na deleção do histórico de movimentação"
       })
     }
   }

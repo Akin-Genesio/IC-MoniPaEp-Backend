@@ -1,35 +1,34 @@
-import { v4 as uuid } from 'uuid'
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
+import { v4 as uuid } from 'uuid'
 import { Patient } from './Patient'
 import { SystemUser } from "./SystemUser";
 
 @Entity("refresh_token")
 class RefreshToken {
-    
-    @PrimaryColumn()
-    readonly id: string
+  @PrimaryColumn()
+  readonly id: string
 
-    @Column()
-    expiresIn: number
+  @Column()
+  expiresIn: number
 
-    @Column()
-    patientId: string
+  @Column()
+  patientId: string
 
-    @Column()
-    systemUserId: string
+  @Column()
+  systemUserId: string
 
-    @OneToOne(() => Patient)
-    @JoinColumn({ name: "patientId" })
-    patient: Patient
+  @OneToOne(() => Patient)
+  @JoinColumn({ name: "patientId" })
+  patient: Patient
 
-    @OneToOne(() => SystemUser)
-    @JoinColumn({ name: "systemUserId" })
-    systemUser: SystemUser
+  @OneToOne(() => SystemUser)
+  @JoinColumn({ name: "systemUserId" })
+  systemUser: SystemUser
 
-    constructor(){
-      if(!this.id){
-        this.id = uuid();
-      }
+  constructor(){
+    if(!this.id){
+      this.id = uuid();
+    }
   }
 }
 

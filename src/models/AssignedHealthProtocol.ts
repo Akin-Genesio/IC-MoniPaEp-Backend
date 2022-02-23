@@ -1,21 +1,22 @@
-import { Entity, JoinColumn, PrimaryColumn } from "typeorm";
+import { Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
 import { Disease } from ".";
 import { HealthProtocol } from "./HealthProtocol";
 
 @Entity("assigned_healthprotocol")
 class AssignedHealthProtocol {
-    @PrimaryColumn()
-    disease_name: string;
+  @PrimaryColumn()
+  disease_name: string;
 
-    @JoinColumn({name: "disease_name"})
-    disease: Disease
+  @OneToOne(() => Disease)
+  @JoinColumn({ name: "disease_name",  referencedColumnName: "name" })
+  disease: Disease
 
-    @PrimaryColumn()
-    healthprotocol_description: string;
+  @PrimaryColumn()
+  healthprotocol_id: string;
 
-    @JoinColumn({name: "healthprotocol_description"})
-    healthprotocol: HealthProtocol
-
+  @OneToOne(() => HealthProtocol)
+  @JoinColumn({ name: "healthprotocol_id", referencedColumnName: "id" })
+  healthprotocol: HealthProtocol
 }
 
 export { AssignedHealthProtocol };

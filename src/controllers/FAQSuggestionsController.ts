@@ -14,58 +14,74 @@ class FAQSuggestionsController {
     })
 
     if(faqSuggestedExists){
-      return response.status(406).json({
-        error: "This question has already been suggested!"
+      return response.status(403).json({
+        error: "Essa sugestão de questão já foi registrada"
       })
     }
 
     try {
-      const faq = faqSuggestionsRepository.create(body)
-      await faqSuggestionsRepository.save(faq)
+      const faqBody = faqSuggestionsRepository.create(body)
+      const faq: any = await faqSuggestionsRepository.save(faqBody)
   
-      return response.status(201).json(faq)
+      return response.status(201).json({
+        success: "Sugestão de questão registrada com sucesso",
+        faq
+      })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro no registro da sugestão de questão"
       })
     }
   }
   
   async list(request: Request, response: Response) {
-    const {question} = request.query
+    const { question, id } = request.query
 
     const faqSuggestionsRepository = getCustomRepository(FAQSuggestionsRepository)
+    let filters = {}
+
+    if(id) {
+      filters = { ...filters, id: String(id) }
+
+      const questionExists = await faqSuggestionsRepository.findOne({
+        id: String(id)
+      })
+
+      if(!questionExists) {
+        return response.status(404).json({
+          error: "Sugestão de questão não encontrada"
+        })
+      }
+    }
 
     if(question) {
+      filters = { ...filters, question: String(question) }
+
       const questionExists = await faqSuggestionsRepository.findOne({
         question: String(question)
       })
 
       if(!questionExists) {
         return response.status(404).json({
-          error: "Question not found"
+          error: "Sugestão de questão não encontrada"
         })
       }
-
-      return response.status(200).json(questionExists)
-    } else {
-      const questionsList = await faqSuggestionsRepository.find()
-      return response.status(200).json(questionsList)
     }
+    const questionsList = await faqSuggestionsRepository.find(filters)
+
+    return response.status(200).json(questionsList)
   }
 
   async deleteOne(request: Request, response: Response) {
-    const {question} = request.params
+    const { id } = request.params
 
     const faqSuggestionsRepository = getCustomRepository(FAQSuggestionsRepository)
 
-    const questionExists = await faqSuggestionsRepository.findOne({
-      question: question
-    })
+    const questionExists = await faqSuggestionsRepository.findOne({ id })
 
     if(!questionExists) {
       return response.status(404).json({
-        error: "Question not found"
+        error: "Sugestão de questão não encontrada"
       })
     }
     
@@ -73,14 +89,14 @@ class FAQSuggestionsController {
       await faqSuggestionsRepository.createQueryBuilder()
         .delete()
         .from(FAQSuggestions)
-        .where("question = :question", {question: question})
+        .where("id = :id", { id })
         .execute()
       return response.status(200).json({
-        message: "Question has been deleted"
+        message: "Sugestão de questão deletada com sucesso"
       })
     } catch (error) {
       return response.status(403).json({
-        error: error
+        error: "Erro na deleção da sugestão de questão"
       })
     }
   }

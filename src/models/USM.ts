@@ -1,7 +1,7 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
 
 @Entity("usm")
-class USM{
+class USM {
   @PrimaryColumn()
   name: string
 
@@ -9,11 +9,13 @@ class USM{
   address: string
 
   @Column()
+  neighborhood: string
+
+  @Column()
   latitude: Number
 
   @Column()
   longitude: Number
-
 }
 
-export {USM}
+export { USM }

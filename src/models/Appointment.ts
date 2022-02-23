@@ -3,27 +3,27 @@ import { Patient } from "./Patient"
 
 @Entity("appointments")
 class Appointment{
-    @PrimaryGeneratedColumn("uuid")
-    id:string
+  @PrimaryGeneratedColumn("uuid")
+  id:string
 
-    @Column()
-    date: Date
+  @Column()
+  date: Date
 
-    @Column()
-    whenRemember: Date
+  @Column()
+  whenRemember: Date
 
-    @Column()
-    location:string
+  @Column()
+  location:string
 
-    @Column()
-    type:string
+  @Column()
+  type:string
 
-    @Column()
-    patient_id: string
+  @Column()
+  patient_id: string
 
-    @ManyToOne(() => Patient)
-    @JoinColumn({name: "patient_id"})
-    patient: Patient
+  @ManyToOne(() => Patient)
+  @JoinColumn({ name: "patient_id" })
+  patient: Patient
 }
 
-export {Appointment}
+export { Appointment }

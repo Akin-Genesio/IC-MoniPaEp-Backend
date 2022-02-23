@@ -2,9 +2,8 @@ import { Entity, PrimaryColumn } from "typeorm";
 
 @Entity("symptom")
 class Symptom {
-    @PrimaryColumn()
-    symptom: string
-
+  @PrimaryColumn()
+  symptom: string
 }
 
 export { Symptom }

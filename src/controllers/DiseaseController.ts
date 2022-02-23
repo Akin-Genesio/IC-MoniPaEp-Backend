@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getCustomRepository } from "typeorm";
+import { getCustomRepository, Like } from "typeorm";
 import { Disease } from "../models";
 import { DiseaseRepository } from "../repositories";
 class DiseaseController{
@@ -13,8 +13,8 @@ class DiseaseController{
     })
 
     if(diseaseAlreadyExists){
-      return response.status(400).json({
-        error: "This disease is already registered in the system"
+      return response.status(403).json({
+        error: "Doença já registrada"
       })
     }
     
@@ -22,54 +22,57 @@ class DiseaseController{
       const disease = diseaseRepository.create(body)
       await diseaseRepository.save(disease)
 
-      return response.status(201).json(disease)
+      return response.status(201).json({
+        success: "Doença registrada com sucesso"
+      })
     } catch (error) {
-      return response.status(403).json({
-        error: error.message
+      return response.status(400).json({
+        error: "Erro no registro da doença"
       })
     }
   }
 
   async list(request: Request, response: Response){
-    const diseaseRepository = getCustomRepository(DiseaseRepository)
-
-    const diseaseList = await diseaseRepository.find()
-
-    return response.status(200).json(diseaseList)
-  }
-
-  async getOne(request: Request, response: Response){
-    const {disease_name} = request.params
+    const { name, page } = request.query
+    let filters = {}
 
     const diseaseRepository = getCustomRepository(DiseaseRepository)
 
-    const disease = await diseaseRepository.findOne({
-      name: disease_name
-    })
-    
-    if(!disease){
-      return response.status(404).json({
-        error: "Disease not found"
-      })
+    if(name) {
+      filters = { name: Like(`%${String(name)}%`) }
     }
 
-    return response.status(302).json(disease)
+    let options: any = {
+      where: filters,
+      order: {
+        name: 'ASC'
+      },
+    }
+
+    if(page) {
+      const take = 10
+      options = { ...options, take, skip: ((Number(page) - 1) * take) }
+    }
+
+    const diseaseList = await diseaseRepository.findAndCount(options)
+
+    return response.status(200).json({
+      diseases: diseaseList[0],
+      totalDiseases: diseaseList[1],
+    })
   }
 
   async alterOne(request: Request, response: Response){
     const body = request.body
-    const {disease_name} = request.params
+    const { name } = request.params
 
     const diseaseRepository = getCustomRepository(DiseaseRepository)
 
-
-    const disease = await diseaseRepository.findOne({
-      name: disease_name
-    })
+    const isValidDisease = await diseaseRepository.findOne({ name })
     
-    if(!disease){
+    if(!isValidDisease){
       return response.status(404).json({
-        error: "Disease not found"
+        error: "Doença não encontrada"
       })
     }
 
@@ -77,28 +80,28 @@ class DiseaseController{
       await diseaseRepository.createQueryBuilder()
         .update(Disease)
         .set(body)
-        .where("name = :name", { name: disease_name })
+        .where("name = :name", { name })
         .execute();
-      return response.status(200).json(body)
+      return response.status(200).json({
+        success: "Doença atualizada com sucesso"
+      })
     } catch (error) {
       return response.status(403).json({
-        error: "Disease name is already registered"
+        error: "Erro na atualização da doença"
       })
     }
   }
 
   async deleteOne(request: Request, response: Response){
-    const {disease_name} = request.params
+    const { name } = request.params
 
     const diseaseRepository = getCustomRepository(DiseaseRepository)
 
-    const disease = await diseaseRepository.findOne({
-      name: disease_name
-    })
+    const isValidDisease = await diseaseRepository.findOne({ name })
     
-    if(!disease){
+    if(!isValidDisease){
       return response.status(404).json({
-        error: "Disease not found"
+        error: "Doença não encontrada"
       })
     }
     
@@ -106,17 +109,17 @@ class DiseaseController{
       await diseaseRepository.createQueryBuilder()
         .delete()
         .from(Disease)
-        .where("name = :name", { name: disease_name })
+        .where("name = :name", { name })
         .execute();
       return response.status(200).json({
-        message: "Disease deleted"
+        success: "Doença deletada com sucesso"
       })
     } catch (error) {
       return response.status(403).json({
-        error: error.message
+        error: "Erro na deleção da doença"
       })
     }
   }
 }
 
-export{DiseaseController}
+export { DiseaseController }

@@ -1,12 +1,22 @@
 import { Column, Entity, PrimaryColumn } from "typeorm";
+import { v4 as uuid } from 'uuid'
 
 @Entity("FAQ")
 class FAQ{
-    @PrimaryColumn()
-    question: string;
+  @PrimaryColumn()
+  readonly id: string;
 
-    @Column()
-    answer: string;
+  @Column()
+  question: string;
+
+  @Column()
+  answer: string;
+
+  constructor(){
+    if(!this.id) {
+      this.id = uuid();
+    }
+  }
 }
 
-export {FAQ}
+export { FAQ }

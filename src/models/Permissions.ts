@@ -1,22 +1,23 @@
-import { Column, Entity, JoinColumn, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
 import { SystemUser } from "./SystemUser";
 
 @Entity("permissions")
 class Permissions {
-    @PrimaryColumn()
-    userId: string
+  @PrimaryColumn()
+  userId: string
 
-    @JoinColumn({name: "userId"})
-    systemUser: SystemUser
+  @OneToOne(() => SystemUser)
+  @JoinColumn({ name: "userId", referencedColumnName: "id"})
+  systemUser: SystemUser
 
-    @Column()
-    authorized: boolean
+  @Column()
+  authorized: boolean
 
-    @Column()
-    localAdm: boolean
+  @Column()
+  localAdm: boolean
 
-    @Column()
-    generalAdm: boolean
+  @Column()
+  generalAdm: boolean
 }
 
 export { Permissions }
