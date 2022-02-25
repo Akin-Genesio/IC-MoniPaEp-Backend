@@ -116,10 +116,12 @@ class PatientController{
         })
   
         const refreshToken = await refreshTokenRepository.save(refreshTokenBody)
+        const patient = await patientsRepository.findOne({CPF})
 
         refreshToken.patientId = undefined
+        patient.password = undefined
   
-        return response.status(200).json({ patientId, token, refreshToken })
+        return response.status(200).json({ patient, token, refreshToken })
       } catch (error) {
         return response.status(400).json({
           error: "Erro no login"
