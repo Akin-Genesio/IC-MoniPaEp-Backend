@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { getCustomRepository, In, IsNull } from "typeorm";
 
-import { SymptomOccurrence } from "../models";
+import { Patient, SymptomOccurrence } from "../models";
 import { 
   DiseaseOccurrenceRepository, 
   PatientsRepository, 
@@ -11,14 +11,6 @@ import {
 class SymptomOccurrenceController {
   async create(request: Request, response: Response){
     const body = request.body
-
-    try {
-      body.symptom_name = body.symptom_name.trim()
-    } catch (error) {
-      return response.status(403).json({
-        error: "Sintoma não digitado"
-      })
-    }
 
     const patientsRepository = getCustomRepository(PatientsRepository)
     const symptomOccurrenceRepository = getCustomRepository(SymptomOccurrenceRepository)
@@ -35,15 +27,6 @@ class SymptomOccurrenceController {
       })
     }
     
-    const isValidSymptom = await symptomRepository.findOne({
-      symptom: body.symptom_name
-    })
-
-    if(!isValidSymptom) {
-      return response.status(404).json({
-        error: "Sintoma não encontrado"
-      })
-    }
 
     const existOngoingDiseaseOccurrences = await diseaseOccurrenceRepository.find({
       where: {
@@ -87,6 +70,100 @@ class SymptomOccurrenceController {
         success: "Sintoma registrado com sucesso"
       })
     }
+  }
+  async createSeveral(request: Request, response: Response){
+    const body = request.body
+    
+    const patientsRepository = getCustomRepository(PatientsRepository)
+    const symptomOccurrenceRepository = getCustomRepository(SymptomOccurrenceRepository)
+    const diseaseOccurrenceRepository = getCustomRepository(DiseaseOccurrenceRepository)
+    const symptomRepository = getCustomRepository(SymptomRepository)
+
+    const isValidPatient = await patientsRepository.findOne({
+      id: body.patient_id
+    })
+
+    if(!isValidPatient) {
+      return response.status(404).json({
+        error: "Paciente não encontrado"
+      })
+    }
+    
+    const existOngoingDiseaseOccurrences = await diseaseOccurrenceRepository.find({
+      where: {
+        patient_id: body.patient_id,
+        status: In(["Suspeito", "Infectado"]),
+      }
+    })
+
+    body.registered_date = new Date()
+
+    if(existOngoingDiseaseOccurrences.length === 0) {
+    
+      for(let i  in body.symptoms){
+        console.log("Entrei no if: "+ body.symptoms[i])
+        console.log("Entrei no if: "+ body.patient_id)
+        console.log("Entrei no if: "+ body.disease_occurrence_id)
+        console.log("Entrei no if: "+ body.registered_date)
+      }
+      
+        
+      body.disease_occurrence_id = undefined
+      for(let i  in body.symptoms){
+        try {
+          const symptomOccurrence = symptomOccurrenceRepository.create({
+            patient_id: body.patient_id,
+            disease_occurrence_id: body.disease_occurrence_id,
+            registered_date: body.registered_date,
+            symptom_name: body.symptoms[i]
+          })
+
+          await symptomOccurrenceRepository.save(symptomOccurrence)
+
+        } catch (error) {
+          console.log(error)
+          return response.status(403).json({
+            error: "Erro no cadastro dos sintomas"
+          })
+        }
+      }
+    }
+
+    else {
+      for(const diseaseOccurrence of existOngoingDiseaseOccurrences) {
+        try {
+          body.disease_occurrence_id = diseaseOccurrence.id
+          for(let i  in body.symptoms){
+            const symptomOccurrenceBody = symptomOccurrenceRepository.create({
+              ...body,
+              symptom_name: body.symtoms[i]
+            })
+  
+            await symptomOccurrenceRepository.save(symptomOccurrenceBody)
+          }
+        } catch (error) {
+          return response.status(403).json({
+            error: "Erro no cadastro dos sintomas"
+          })
+        }
+      }
+    }
+    //Atualizando data de última atualização do paciente
+    try {
+      await patientsRepository.createQueryBuilder()
+        .update(Patient)
+        .set({ lastUpdate:  body.registered_date })
+        .where("id = :id", { id: body.patient_id })
+        .execute()
+    } catch (error) {
+      return response.status(404).json({
+        error: "Erro na atualização do status do paciente"
+      })
+    }
+
+    return response.status(201).json({
+      success: "Sintomas registrado com sucesso"
+    })
   }
 
   async getUnassignedOccurrences(request: Request, response: Response) {
