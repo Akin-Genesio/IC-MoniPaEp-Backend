@@ -13,7 +13,7 @@ type TokenPayload = {
 
 const secret = 'wLbITYtzyd0hOOOPVQGRPnQh84RRY3KPiybKYwhzin8TCejiBgJoos22RBrxiWU'
 
-export const sign = (payload: TokenPayload) => jwt.sign(payload, secret, { expiresIn: 60 * 60 })
+export const sign = (payload: TokenPayload) => jwt.sign(payload, secret, { expiresIn: 60 * 60 * 24})
 export const verify = (token: string) => jwt.verify(token, secret)
 
 export const authMiddleware = async (request, response: Response, next) => {
