@@ -15,10 +15,6 @@ export class FAQSuggestions1625588123892 implements MigrationInterface {
             name: "question",
             type: "varchar",
             isUnique: true
-          },
-          {
-            name: "answer",
-            type: "varchar",
           }
         ]
       })

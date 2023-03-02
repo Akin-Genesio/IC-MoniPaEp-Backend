@@ -9,9 +9,6 @@ class FAQSuggestions{
   @Column()
   question: string;
 
-  @Column()
-  answer: string;
-
   constructor(){
     if(!this.id) {
       this.id = uuid();
