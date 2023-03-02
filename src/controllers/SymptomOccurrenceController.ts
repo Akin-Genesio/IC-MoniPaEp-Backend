@@ -26,6 +26,13 @@ class SymptomOccurrenceController {
         error: "Paciente não encontrado"
       })
     }
+
+    if(body.symptoms.length == 0) {
+      return response.status(404).json({
+        error: "Selecione pelo menos um sintoma"
+      })
+    }
+    
     
 
     const existOngoingDiseaseOccurrences = await diseaseOccurrenceRepository.find({
