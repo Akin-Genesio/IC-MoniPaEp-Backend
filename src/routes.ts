@@ -103,6 +103,7 @@ router.delete("/diseaseoccurrence/:id", jwt.authMiddleware, jwt.systemUserMiddle
 router.post("/symptomoccurrence", jwt.authMiddleware, symptomOccurrenceController.create)//geral autenticado*
 router.post("/symptomoccurrenceSeveral",jwt.authMiddleware, symptomOccurrenceController.createSeveral)//geral autenticado*
 router.get("/symptomoccurrence", jwt.authMiddleware, symptomOccurrenceController.list)//geral autenticado
+router.post("/symptomoccurrence/listOcurrences", jwt.authMiddleware, symptomOccurrenceController.listOccurences)//geral autenticado
 router.get("/symptomoccurrence/unassigned", jwt.authMiddleware, symptomOccurrenceController.getUnassignedOccurrences)//geral autenticado
 router.put("/symptomoccurrence/:id", jwt.authMiddleware, symptomOccurrenceController.alterOne)//geral autenticado*
 router.delete("/symptomoccurrence/:id", jwt.authMiddleware, symptomOccurrenceController.deleteOne)//geral autenticado*

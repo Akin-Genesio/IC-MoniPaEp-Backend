@@ -306,6 +306,48 @@ class SymptomOccurrenceController {
     return response.status(200).json(occurrencesList)
   }
 
+  async listOccurences(request: Request, response: Response) {
+    const { patient_id } = request.body
+
+    const symptomOccurrenceRepository = getCustomRepository(SymptomOccurrenceRepository)
+    let filters = {}
+
+      const isValidOccurrence = await symptomOccurrenceRepository.find({
+        patient_id: String(patient_id)
+      })
+
+      if(!isValidOccurrence) {
+        return response.status(404).json({
+          error: "Nenhum sintoma cadastrado ainda"
+        })
+      }
+
+    if(patient_id) {
+      filters = { ...filters, patient_id: String(patient_id) }
+
+      const patientsRepository = getCustomRepository(PatientsRepository)
+      const isValidPatient = await patientsRepository.findOne({
+        id: String(patient_id)
+      })
+
+      if(!isValidPatient) {
+        return response.status(404).json({
+          error: "Paciente não encontrado"
+        })
+      }
+    }
+    const occurrencesList = await symptomOccurrenceRepository.find({
+      where: filters,
+      order: {
+        registered_date: 'DESC'
+      }
+    })
+
+    return response.status(200).json({
+      symptoms: occurrencesList
+    })
+  }
+
   async alterOne(request: Request, response: Response) {
     const body = request.body
     const { id } = request.params
