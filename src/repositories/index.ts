@@ -14,3 +14,4 @@ export * from "./SystemUserRepository"
 export * from "./PermissionsRepository"
 export * from "./FAQSuggestionsRepository"
 export * from "./RefreshTokenRepository"
+export * from './AboutTheAppRepository'

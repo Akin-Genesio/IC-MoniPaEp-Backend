@@ -6,6 +6,7 @@ import {
   USMController, 
   VaccineController
 } from "./controllers";
+import { AboutTheAppController } from "./controllers/AboutTheAppController";
 import { AppointmentController } from "./controllers/AppointmentController";
 import { AssignedHealthProtocolController } from "./controllers/AssignedHealthProtocolController";
 import { DiseaseOccurrenceController } from "./controllers/DiseaseOccurrenceController";
@@ -35,6 +36,7 @@ const systemUserController = new SystemUserController()
 const permissionsController = new PermissionsController()
 const faqSuggestionsController = new FAQSuggestionsController()
 const refreshTokenController = new RefreshTokenController()
+const aboutController = new AboutTheAppController
 //const appointmentController = new AppointmentController()
 //const vaccineController = new VaccineController()
 
@@ -130,6 +132,12 @@ router.delete("/faq/:id", jwt.authMiddleware, jwt.systemUserMiddleware, faqContr
 router.post("/faqsuggestions", faqSuggestionsController.create)
 router.get("/faqsuggestions", faqSuggestionsController.list)
 router.delete("/faqsuggestions/:id", jwt.authMiddleware, jwt.systemUserMiddleware, faqSuggestionsController.deleteOne)
+
+//About The App Routes
+router.post("/about", jwt.authMiddleware, jwt.systemUserMiddleware, aboutController.create)//usuario de sistema autenticado
+router.get("/about", aboutController.list)//geral
+router.put("/about/:id", jwt.authMiddleware, jwt.systemUserMiddleware, aboutController.alterOne)//usuario de sistema autenticado
+router.delete("/about/:id", jwt.authMiddleware, jwt.systemUserMiddleware, aboutController.deleteOne)//usuario de sistema autenticado
 
 //Appointments Routes - TBD
 // router.post("/appointments", appointmentController.create)//funcionarios USM
