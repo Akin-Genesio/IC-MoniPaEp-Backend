@@ -14,11 +14,11 @@ export class Appointment1617140266151 implements MigrationInterface {
           },
           {
             name: "date",
-            type: "datetime",
+            type: "timestamp",
           },
           {
             name: "whenRemember",
-            type: "datetime",
+            type: "timestamp",
           },
           {
             name: "location",

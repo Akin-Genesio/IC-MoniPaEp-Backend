@@ -29,7 +29,7 @@ export class SymptomOccurrence1617644285378 implements MigrationInterface {
           },
           {
             name: "registered_date",
-            type: "datetime",
+            type: "timestamp",
             isNullable: false
           }
         ],

@@ -13,7 +13,7 @@ export class AssignedHealthProtocol1617294112893 implements MigrationInterface {
           },
           {
             name: "healthprotocol_id",
-            type: "varchar",   
+            type: "uuid",   
             isPrimary: true
           }
         ],

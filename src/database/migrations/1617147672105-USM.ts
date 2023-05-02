@@ -21,11 +21,11 @@ export class USM1617147672105 implements MigrationInterface {
           },
           {
             name: "latitude",
-            type: "decimal(8,6)"
+            type: "double precision"
           },
           {
             name: "longitude",
-            type: "decimal(9,6)"
+            type: "double precision"
           },
         ]
       })

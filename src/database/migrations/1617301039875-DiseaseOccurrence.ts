@@ -28,12 +28,12 @@ export class DiseaseOccurrence1617301039875 implements MigrationInterface {
           },
           {
             name: "date_start",
-            type: "datetime",
+            type: "timestamp",
             isNullable: true,
           },
           {
             name: "date_end",
-            type: "datetime",
+            type: "timestamp",
             isNullable: true,
           },
           {

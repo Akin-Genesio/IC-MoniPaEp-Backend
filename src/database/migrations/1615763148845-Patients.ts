@@ -66,7 +66,7 @@ export class Patients1615763148845 implements MigrationInterface {
           },
           {
             name: "houseNumber",
-            type: "number"
+            type: "integer"
           },
           {
             name: "hasHealthPlan",
@@ -88,11 +88,11 @@ export class Patients1615763148845 implements MigrationInterface {
           },
           {
             name: "createdAt",
-            type: "datetime"
+            type: "timestamp"
           },
           {
             name: "lastUpdate",
-            type: "datetime"
+            type: "timestamp"
           }
         ]
       }) 

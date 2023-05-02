@@ -13,7 +13,7 @@ export class Vaccines1617149572377 implements MigrationInterface {
           },
           {
             name: "date",
-            type: "datetime",
+            type: "timestamp",
           },
           {
             name: "type",
