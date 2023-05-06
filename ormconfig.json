@@ -5,7 +5,6 @@
     "username": "akin",
     "password": "akin123",
     "database": "monipaep",
-    "synchronize": true,
     "logging": true,
     "migrations": ["./src/database/migrations/**.ts"],
     "entities": ["./src/models/**.ts"],

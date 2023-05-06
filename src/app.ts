@@ -1,7 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express';
 import cors from 'cors'
 import { scheduleJob } from 'node-schedule'
-import createConnection from'./database'
+import createConnection from './database'
 import { router } from './routes';
 import { AppError } from './errors';
 import { verifyOccurrencesExpiration } from './scheduledJobs';
